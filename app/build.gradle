@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'com.google.gms.google-services'
+    id 'kotlin-android'
 }
 
 def BUILD_DATE = getBuildDate()
@@ -62,6 +63,10 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
 
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
     buildFeatures {
         buildConfig true
         viewBinding true
@@ -82,4 +87,6 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics'
 
     implementation 'me.dm7.barcodescanner:zxing:1.9.8'
+
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.1.0'
 }
