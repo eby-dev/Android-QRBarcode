@@ -14,10 +14,10 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.ahmadabuhasan.qrbarcode.databinding.ActivityMainBinding;
+import com.ahmadabuhasan.qrbarcode.utils.BaseActivity;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.tasks.Task;
@@ -38,7 +38,7 @@ import me.dm7.barcodescanner.zxing.ZXingScannerView;
  * "com.android.tools.build:gradle:4.1.1"
  */
 
-public class MainActivity extends AppCompatActivity implements ZXingScannerView.ResultHandler {
+public class MainActivity extends BaseActivity implements ZXingScannerView.ResultHandler {
 
     private static final int PERMISSION_CODE = 100;
     private static final int FLEXIBLE_APP_UPDATE_REQ_CODE = 123;

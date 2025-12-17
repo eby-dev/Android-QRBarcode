@@ -1,20 +1,21 @@
 package com.ahmadabuhasan.qrbarcode;
 
-import static com.ahmadabuhasan.qrbarcode.Utils.interstitialAd;
+import static com.ahmadabuhasan.qrbarcode.utils.Utils.interstitialAd;
 
 import android.os.Bundle;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.ahmadabuhasan.qrbarcode.databinding.ActivityAboutBinding;
+import com.ahmadabuhasan.qrbarcode.utils.BaseActivity;
+import com.ahmadabuhasan.qrbarcode.utils.Utils;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.MobileAds;
 
 import java.util.Objects;
 
-public class AboutActivity extends AppCompatActivity {
+public class AboutActivity extends BaseActivity {
 
     private ActivityAboutBinding binding;
 
@@ -26,7 +27,7 @@ public class AboutActivity extends AppCompatActivity {
 
         Objects.requireNonNull(getSupportActionBar()).setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle("About QRBarcode");
+        getSupportActionBar().setTitle(getString(R.string.about));
 
         binding.version.setText(String.format("%s%s", getResources().getString(R.string.version), BuildConfig.VERSION_NAME));
 
