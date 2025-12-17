@@ -10,11 +10,13 @@
         <item name="colorSecondaryVariant">@color/black</item>
         <item name="colorOnSecondary">@color/white</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
         <!-- To change the popup menu and app text color  -->
         <item name="android:textColor">?attr/colorPrimary</item>
         <!-- To change the background of options menu-->
         <item name="android:itemBackground">?attr/colorOnPrimary</item>
+
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 </resources>
