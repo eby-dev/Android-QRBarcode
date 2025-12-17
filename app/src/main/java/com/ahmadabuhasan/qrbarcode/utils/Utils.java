@@ -1,4 +1,4 @@
-package com.ahmadabuhasan.qrbarcode;
+package com.ahmadabuhasan.qrbarcode.utils;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -6,6 +6,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.ahmadabuhasan.qrbarcode.R;
 import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.FullScreenContentCallback;
@@ -15,15 +16,14 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 
 public class Utils {
 
-    private static final String TAG = "Utils";
-    private static final String AD_UNIT_ID = "ca-app-pub-8638037215789792/1721440279";
+    private static final String TAG = Utils.class.getSimpleName();
     public static InterstitialAd interstitialAd;
 
     public void loadAd(Context context) {
         AdRequest adRequest = new AdRequest.Builder().build();
         InterstitialAd.load(
                 context,
-                AD_UNIT_ID,
+                context.getString(R.string.AdMob_Interstitial_Ads_ID),
                 adRequest,
                 new InterstitialAdLoadCallback() {
                     @Override
