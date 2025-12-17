@@ -61,20 +61,6 @@ jobs:
       - name: Create Google Service Account JSON
         run: echo "${{ secrets.GOOGLE_PLAY_JSON }}" | base64 -d > app/${{ env.GOOGLE_PLAY_JSON }}
 
-      - name: Debug directory
-        run: |
-          ls -l
-          echo ""
-          ls -l app/
-
-      - name: Upload Secrets
-        uses: actions/upload-artifact@v4
-        with:
-          name: secrets
-          path: |
-            ${{ env.KEYSTORE_FILE }}
-            app/${{ env.GOOGLE_PLAY_JSON }}
-
   build:
     name: Build AAB
     runs-on: ubuntu-latest
@@ -107,16 +93,12 @@ jobs:
           bundle config set path 'vendor/bundle'
           bundle install
 
-      - name: Download Secrets
-        uses: actions/download-artifact@v4
-        with:
-          name: secrets
+      # 🔐 Decode secrets (runtime only)
+      - name: Decode Keystore File
+        run: echo "${{ secrets.KEYSTORE_FILE }}" | base64 -d > ${{ env.KEYSTORE_FILE }}
 
-      - name: Debug directory
-        run: |
-          ls -l
-          echo ""
-          ls -l app/
+      - name: Create Google Service Account JSON
+        run: echo "${{ secrets.GOOGLE_PLAY_JSON }}" | base64 -d > app/${{ env.GOOGLE_PLAY_JSON }}
 
       - name: Write local.properties
         run: |
@@ -132,10 +114,19 @@ jobs:
       - name: Build AAB via Fastlane
         run: bundle exec fastlane buildBundle
 
+      # 📦 ONLY BUILD OUTPUT
       - uses: actions/upload-artifact@v4
         with:
           name: release-aab
           path: app/build/outputs/bundle/release/*.aab
+
+      # 🧹 Cleanup
+      - name: Cleanup secrets
+        if: always()
+        run: |
+          rm -f ${{ env.KEYSTORE_FILE }}
+          rm -f app/${{ env.GOOGLE_PLAY_JSON }}
+          rm -f secret.properties
 
   unit-test:
     name: Unit Tests
@@ -162,8 +153,7 @@ jobs:
           bundle install
           bundle update fastlane
 
-      - name: Grant gradlew permission
-        run: chmod +x ./gradlew
+      - run: chmod +x ./gradlew
 
       - run: bundle exec fastlane test
 
@@ -182,9 +172,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Grant gradlew permission
-        run: chmod +x ./gradlew
-
+      - run: chmod +x ./gradlew
       - run: ./gradlew clean check
 
       - uses: actions/upload-artifact@v4
@@ -192,7 +180,7 @@ jobs:
           name: lint-reports
           path: |
             app/build/reports/**/*.html
-            app/build/intermediates/lint_intermediate_text_report/debug/*.txt
+            app/build/intermediates/lint_intermediate_text_report/**/*.txt
             app/build/reports/lint-baseline.xml
 
   deploy-release:
@@ -218,22 +206,14 @@ jobs:
           bundle config set path 'vendor/bundle'
           bundle install
 
-      - name: Download Secrets
-        uses: actions/download-artifact@v4
-        with:
-          name: secrets
+      - name: Create Google Service Account JSON
+        run: echo "${{ secrets.GOOGLE_PLAY_JSON }}" | base64 -d > app/${{ env.GOOGLE_PLAY_JSON }}
 
       - name: Download built AAB
         uses: actions/download-artifact@v4
         with:
           name: release-aab
           path: app/build/outputs/bundle/release
-
-      - name: Debug directory
-        run: |
-          ls -l
-          echo ""
-          ls -l app/
 
       - run: bundle exec fastlane deployRelease
 
