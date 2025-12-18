@@ -1,5 +1,6 @@
 package com.ahmadabuhasan.qrbarcode.utils
 
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -10,27 +11,33 @@ import androidx.core.view.WindowInsetsCompat
 abstract class BaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        applyEdgeToEdge()
         super.onCreate(savedInstanceState)
+        applyEdgeToEdge()
     }
 
     private fun applyEdgeToEdge() {
-        val content = findViewById<View>(android.R.id.content)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        ViewCompat.setOnApplyWindowInsetsListener(content) { view, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val decorView = window.decorView
+            val content = findViewById<View>(android.R.id.content)
 
-            view.setPadding(
-                view.paddingLeft,
-                systemBars.top,
-                view.paddingRight,
-                systemBars.bottom
-            )
+            decorView.post {
+                ViewCompat.setOnApplyWindowInsetsListener(decorView) { _, insets ->
+                    val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+                    val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
 
-            insets
+                    content.setPadding(
+                        systemBars.left,
+                        systemBars.top,
+                        systemBars.right,
+                        maxOf(ime.bottom, systemBars.bottom)
+                    )
+
+                    insets
+                }
+            }
         }
-
     }
 
 }
