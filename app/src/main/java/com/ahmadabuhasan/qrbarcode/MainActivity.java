@@ -19,7 +19,6 @@ import androidx.core.content.ContextCompat;
 import com.ahmadabuhasan.qrbarcode.databinding.ActivityMainBinding;
 import com.ahmadabuhasan.qrbarcode.utils.BaseActivity;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.play.core.appupdate.AppUpdateInfo;
@@ -73,9 +72,6 @@ public class MainActivity extends BaseActivity implements ZXingScannerView.Resul
             }
         };
 
-        MobileAds.initialize(this, initializationStatus -> {
-
-        });
         AdRequest adRequest = new AdRequest.Builder().build();
         binding.adView.loadAd(adRequest);
 

@@ -11,7 +11,6 @@ import com.ahmadabuhasan.qrbarcode.databinding.ActivityAboutBinding;
 import com.ahmadabuhasan.qrbarcode.utils.BaseActivity;
 import com.ahmadabuhasan.qrbarcode.utils.Utils;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.MobileAds;
 
 import java.util.Objects;
 
@@ -31,9 +30,6 @@ public class AboutActivity extends BaseActivity {
 
         binding.version.setText(String.format("%s%s", getResources().getString(R.string.version), BuildConfig.VERSION_NAME));
 
-        MobileAds.initialize(this, initializationStatus -> {
-
-        });
         new Utils().loadAd(this);
         showInterstitial();
         AdRequest adRequest = new AdRequest.Builder().build();
