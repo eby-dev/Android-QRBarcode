@@ -10,10 +10,9 @@
         android:id="@+id/icon_logo"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:layout_marginTop="150dp"
         android:contentDescription="@string/app_name"
         android:src="@drawable/qrbarcode"
-        app:layout_constraintBottom_toTopOf="@+id/app_name"
+        app:layout_constraintBottom_toTopOf="@id/container_ads"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -39,6 +38,7 @@
         app:layout_constraintTop_toBottomOf="@+id/app_name" />
 
     <LinearLayout
+        android:id="@+id/container_ads"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
