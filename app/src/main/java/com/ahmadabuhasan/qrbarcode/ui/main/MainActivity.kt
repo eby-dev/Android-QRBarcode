@@ -47,12 +47,12 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler {
     private lateinit var appUpdateManager: AppUpdateManager
     private lateinit var installStateUpdatedListener: InstallStateUpdatedListener
 
-    private var binding: ActivityMainBinding? = null
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding!!.root)
+        setContentView(binding.root)
 
         if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(arrayOf(Manifest.permission.CAMERA), PERMISSION_CODE)
@@ -73,10 +73,10 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler {
         }
 
         val adRequest = AdRequest.Builder().build()
-        binding?.adView?.loadAd(adRequest)
+        binding.adView?.loadAd(adRequest)
 
         zXingScannerView = ZXingScannerView(this)
-        binding?.contentFrame?.addView(zXingScannerView)
+        binding.contentFrame?.addView(zXingScannerView)
 
         setupFlashButtons()
         observeViewModel()
@@ -86,8 +86,8 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler {
     private fun observeViewModel() {
         viewModel.flashEnabled.observe(this) { enabled ->
             zXingScannerView.setFlash(enabled)
-            binding?.flashOn?.visibility = if (enabled) View.GONE else View.VISIBLE
-            binding?.flashOff?.visibility = if (enabled) View.VISIBLE else View.GONE
+            binding.flashOn?.visibility = if (enabled) View.GONE else View.VISIBLE
+            binding.flashOff?.visibility = if (enabled) View.VISIBLE else View.GONE
         }
 
         viewModel.scanAction.observe(this) { action ->
@@ -111,8 +111,8 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler {
 
     // Activity hanya tahu "user tap flash" → delegasi ke ViewModel
     private fun setupFlashButtons() {
-        binding?.flashOn?.setOnClickListener { viewModel.toggleFlash() }
-        binding?.flashOff?.setOnClickListener { viewModel.toggleFlash() }
+        binding.flashOn?.setOnClickListener { viewModel.toggleFlash() }
+        binding.flashOff?.setOnClickListener { viewModel.toggleFlash() }
     }
 
     override fun onResume() {
@@ -125,7 +125,6 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler {
     override fun onDestroy() {
         super.onDestroy()
         zXingScannerView.stopCamera()
-        binding = null
     }
 
     // Activity terima hasil scan → kirim ke ViewModel untuk diproses

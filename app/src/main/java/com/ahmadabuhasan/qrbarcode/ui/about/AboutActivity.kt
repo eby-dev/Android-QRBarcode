@@ -12,12 +12,12 @@ import com.google.android.gms.ads.AdRequest
 
 class AboutActivity : BaseActivity() {
 
-    private var binding: ActivityAboutBinding? = null
+    private lateinit var binding: ActivityAboutBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAboutBinding.inflate(layoutInflater)
-        setContentView(binding!!.root)
+        setContentView(binding.root)
 
         supportActionBar?.apply {
             setHomeButtonEnabled(true)
@@ -25,15 +25,14 @@ class AboutActivity : BaseActivity() {
             setTitle(R.string.about)
         }
 
-        binding?.version?.text = "%s%s".format(
+        binding.version.text = "%s%s".format(
             resources.getString(R.string.version),
             BuildConfig.VERSION_NAME
         )
 
         Utils().loadAd(this)
         showInterstitial()
-        val adRequest = AdRequest.Builder().build()
-        binding?.adViewAbout?.loadAd(adRequest)
+        binding.adViewAbout.loadAd(AdRequest.Builder().build())
     }
 
     private fun showInterstitial() {
@@ -42,11 +41,6 @@ class AboutActivity : BaseActivity() {
         } else {
             Utils().loadAd(this)
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        binding = null
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

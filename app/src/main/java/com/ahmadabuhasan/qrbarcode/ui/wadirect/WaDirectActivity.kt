@@ -14,12 +14,12 @@ import com.google.android.gms.ads.AdRequest
 class WaDirectActivity : BaseActivity() {
 
     private val viewModel: WaDirectViewModel by viewModels()
-    private var binding: ActivityWaDirectBinding? = null
+    private lateinit var binding: ActivityWaDirectBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityWaDirectBinding.inflate(layoutInflater)
-        setContentView(binding!!.root)
+        setContentView(binding.root)
 
         supportActionBar?.apply {
             setHomeButtonEnabled(true)
@@ -27,11 +27,10 @@ class WaDirectActivity : BaseActivity() {
             setTitle(R.string.wa_direct)
         }
 
-        binding?.adViewWaDirect?.loadAd(AdRequest.Builder().build())
+        binding.adViewWaDirect.loadAd(AdRequest.Builder().build())
 
-        binding?.btnOpen?.setOnClickListener {
-            val input = binding?.editPhone?.text?.toString() ?: ""
-            viewModel.onOpenClicked(input)
+        binding.btnOpen.setOnClickListener {
+            viewModel.onOpenClicked(binding.editPhone.text?.toString() ?: "")
         }
 
         observeViewModel()
@@ -54,7 +53,6 @@ class WaDirectActivity : BaseActivity() {
     private fun openWhatsApp(number: String) {
         val uri = Uri.parse("https://wa.me/$number")
         val intent = Intent(Intent.ACTION_VIEW, uri)
-        // Cek apakah WhatsApp terinstall
         if (intent.resolveActivity(packageManager) != null) {
             startActivity(intent)
         } else {
@@ -65,10 +63,5 @@ class WaDirectActivity : BaseActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) finish()
         return super.onOptionsItemSelected(item)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        binding = null
     }
 }
