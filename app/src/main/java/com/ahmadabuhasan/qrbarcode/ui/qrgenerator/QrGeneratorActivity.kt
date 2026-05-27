@@ -62,7 +62,8 @@ class QrGeneratorActivity : BaseActivity() {
     }
 
     private fun shareQrImage(bitmap: Bitmap) {
-        val file = File(cacheDir, "qr_code.png")
+        val qrDir = File(cacheDir, "qr_codes").also { it.mkdirs() }
+        val file = File(qrDir, "qr_code.png")
         FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
         val uri: Uri = FileProvider.getUriForFile(this, "$packageName.provider", file)
         val intent = Intent(Intent.ACTION_SEND).apply {

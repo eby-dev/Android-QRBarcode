@@ -139,7 +139,7 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == PERMISSION_CODE) {
+        if (requestCode == PERMISSION_CODE && grantResults.isNotEmpty()) {
             val message = if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 "Camera permission granted"
             } else {
