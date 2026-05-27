@@ -25,10 +25,7 @@ class AboutActivity : BaseActivity() {
             setTitle(R.string.about)
         }
 
-        binding.version.text = "%s%s".format(
-            resources.getString(R.string.version),
-            BuildConfig.VERSION_NAME
-        )
+        binding.version.text = getString(R.string.version) + BuildConfig.VERSION_NAME
 
         Utils().loadAd(this)
         showInterstitial()
