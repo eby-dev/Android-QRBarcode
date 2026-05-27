@@ -222,6 +222,7 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler {
     }
 
     @Deprecated("Deprecated in Java")
+    @Suppress("MissingSuperCall")
     override fun onBackPressed() {
         if (pressedTime + 2000 > System.currentTimeMillis()) {
             finishAndRemoveTask()

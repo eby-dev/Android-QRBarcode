@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 8.7.3" type="baseline" client="gradle" dependencies="false" name="AGP (8.7.3)" variant="all" version="8.7.3">
+
+    <issue
+        id="Instantiatable"
+        message="`AboutActivity` must extend android.app.Activity"
+        errorLine1="        &lt;activity android:name=&quot;.ui.about.AboutActivity&quot; />"
+        errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="25"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="Instantiatable"
+        message="`QrGeneratorActivity` must extend android.app.Activity"
+        errorLine1="        &lt;activity android:name=&quot;.ui.qrgenerator.QrGeneratorActivity&quot; />"
+        errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="26"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="Instantiatable"
+        message="`WaDirectActivity` must extend android.app.Activity"
+        errorLine1="            android:name=&quot;.ui.wadirect.WaDirectActivity&quot;"
+        errorLine2="                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="38"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="Instantiatable"
+        message="`MainActivity` must extend android.app.Activity"
+        errorLine1="            android:name=&quot;.ui.main.MainActivity&quot;"
+        errorLine2="                          ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="41"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="Instantiatable"
+        message="`AdView` must extend android.view.View"
+        errorLine1="        &lt;com.google.android.gms.ads.AdView"
+        errorLine2="        ^">
+        <location
+            file="src/main/res/layout/activity_about.xml"
+            line="49"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="Instantiatable"
+        message="`TextInputEditText` must extend android.view.View"
+        errorLine1="        &lt;com.google.android.material.textfield.TextInputEditText"
+        errorLine2="        ^">
+        <location
+            file="src/main/res/layout/activity_qr_generator.xml"
+            line="30"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="Instantiatable"
+        message="`MaterialButton` must extend android.view.View"
+        errorLine1="    &lt;com.google.android.material.button.MaterialButton"
+        errorLine2="    ^">
+        <location
+            file="src/main/res/layout/activity_qr_generator.xml"
+            line="39"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.appcompat:appcompat than 1.6.1 is available: 1.7.1"
+        errorLine1="    implementation &apos;androidx.appcompat:appcompat:1.6.1&apos;"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle"
+            line="81"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of com.google.android.material:material than 1.9.0 is available: 1.14.0"
+        errorLine1="    implementation &apos;com.google.android.material:material:1.9.0&apos;"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle"
+            line="82"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.constraintlayout:constraintlayout than 2.1.4 is available: 2.2.1"
+        errorLine1="    implementation &apos;androidx.constraintlayout:constraintlayout:2.1.4&apos;"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle"
+            line="83"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.test.ext:junit than 1.1.5 is available: 1.3.0"
+        errorLine1="    androidTestImplementation &apos;androidx.test.ext:junit:1.1.5&apos;"
+        errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle"
+            line="85"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.test.espresso:espresso-core than 3.5.1 is available: 3.7.0"
+        errorLine1="    androidTestImplementation &apos;androidx.test.espresso:espresso-core:3.5.1&apos;"
+        errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle"
+            line="86"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of com.google.android.gms:play-services-ads than 24.5.0 is available: 25.3.0"
+        errorLine1="    implementation &apos;com.google.android.gms:play-services-ads:24.5.0&apos;"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle"
+            line="89"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of com.google.firebase:firebase-bom than 34.0.0 is available: 34.13.0"
+        errorLine1="    implementation platform(&apos;com.google.firebase:firebase-bom:34.0.0&apos;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle"
+            line="90"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.lifecycle:lifecycle-viewmodel-ktx than 2.8.7 is available: 2.10.0"
+        errorLine1="    implementation &apos;androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7&apos;"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle"
+            line="97"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.lifecycle:lifecycle-livedata-ktx than 2.8.7 is available: 2.10.0"
+        errorLine1="    implementation &apos;androidx.lifecycle:lifecycle-livedata-ktx:2.8.7&apos;"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle"
+            line="98"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.activity:activity-ktx than 1.9.3 is available: 1.13.0"
+        errorLine1="    implementation &apos;androidx.activity:activity-ktx:1.9.3&apos;"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle"
+            line="99"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="Overdraw"
+        message="Possible overdraw: Root element paints background `#FF000000` with a theme that also paints a background (inferred theme is `@style/Theme.QRBarcode`)"
+        errorLine1="    android:background=&quot;#FF000000&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_main.xml"
+            line="8"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="MonochromeLauncherIcon"
+        message="The application adaptive icon is missing a monochrome tag"
+        errorLine1="&lt;adaptive-icon xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;>"
+        errorLine2="^">
+        <location
+            file="src/main/res/mipmap-anydpi-v26/ic_launcher_qrbarcode.xml"
+            line="2"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="MonochromeLauncherIcon"
+        message="The application adaptive roundIcon is missing a monochrome tag"
+        errorLine1="&lt;adaptive-icon xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;>"
+        errorLine2="^">
+        <location
+            file="src/main/res/mipmap-anydpi-v26/ic_launcher_qrbarcode_round.xml"
+            line="2"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="IconLocation"
+        message="Found bitmap drawable `res/drawable/qrbarcode.png` in densityless folder">
+        <location
+            file="src/main/res/drawable/qrbarcode.png"/>
+    </issue>
+
+    <issue
+        id="UnnecessaryRequiredFeature"
+        message="Consider whether this feature (`android.hardware.camera.autofocus`) really is required for the app to function; you can set `android:required=&quot;false&quot;` to indicate that the feature is used but not required"
+        errorLine1="    &lt;uses-feature android:name=&quot;android.hardware.camera.autofocus&quot; />"
+        errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="13"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="UnnecessaryRequiredFeature"
+        message="Consider whether this feature (`android.hardware.camera.flash`) really is required for the app to function; you can set `android:required=&quot;false&quot;` to indicate that the feature is used but not required"
+        errorLine1="    &lt;uses-feature android:name=&quot;android.hardware.camera.flash&quot; />"
+        errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="14"
+            column="33"/>
+    </issue>
+
+</issues>
