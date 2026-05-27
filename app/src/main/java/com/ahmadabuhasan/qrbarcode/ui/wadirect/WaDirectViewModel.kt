@@ -4,23 +4,22 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
+data class WaDirectParams(val number: String, val message: String)
+
 class WaDirectViewModel : ViewModel() {
 
-    private val _phoneNumber = MutableLiveData<String>()
-
-    // Hasil format nomor yang siap dibuka di WhatsApp, null jika nomor tidak valid
-    private val _openWhatsApp = MutableLiveData<String?>()
-    val openWhatsApp: LiveData<String?> = _openWhatsApp
+    private val _openWhatsApp = MutableLiveData<WaDirectParams?>()
+    val openWhatsApp: LiveData<WaDirectParams?> = _openWhatsApp
 
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
 
-    fun onOpenClicked(input: String) {
-        val formatted = formatNumber(input.trim())
+    fun onOpenClicked(phone: String, countryCode: String, message: String) {
+        val formatted = formatNumber(phone.trim(), countryCode)
         if (formatted == null) {
             _error.value = "invalid"
         } else {
-            _openWhatsApp.value = formatted
+            _openWhatsApp.value = WaDirectParams(formatted, message.trim())
         }
     }
 
@@ -32,18 +31,15 @@ class WaDirectViewModel : ViewModel() {
         _error.value = null
     }
 
-    // Konversi berbagai format nomor ke format wa.me (628xxx)
-    private fun formatNumber(input: String): String? {
+    private fun formatNumber(input: String, countryCode: String): String? {
         if (input.isBlank()) return null
-
-        // Ambil digit saja
         val digits = input.filter { it.isDigit() }
-        if (digits.length < 7) return null
+        if (digits.length < 5) return null
 
         return when {
-            digits.startsWith("62") -> digits          // sudah format internasional
-            digits.startsWith("0") -> "62" + digits.substring(1)  // 08xxx → 628xxx
-            else -> "62$digits"                         // langsung tambah 62
+            digits.startsWith(countryCode) -> digits
+            digits.startsWith("0") -> countryCode + digits.substring(1)
+            else -> countryCode + digits
         }
     }
 }

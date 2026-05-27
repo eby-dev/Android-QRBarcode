@@ -6,10 +6,11 @@
     <string name="AdMob_Interstitial_Ads_ID">ca-app-pub-8638037215789792/1721440279</string>
     <string name="about">About</string>
     <string name="wa_direct">WA Direct</string>
-    <string name="wa_direct_hint">WhatsApp number (e.g. 08123456789)</string>
+    <string name="wa_direct_hint">Phone number</string>
     <string name="wa_direct_open">Open WhatsApp</string>
     <string name="wa_direct_invalid">Invalid phone number</string>
     <string name="wa_direct_not_installed">WhatsApp is not installed</string>
+    <string name="wa_direct_message_hint">Message (optional)</string>
     <string name="version">Version:\u0020</string>
     <string name="flashOn">Flash On</string>
     <string name="flashOff">Flash Off</string>

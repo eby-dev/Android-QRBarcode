@@ -10,6 +10,7 @@ import com.ahmadabuhasan.qrbarcode.R
 import com.ahmadabuhasan.qrbarcode.databinding.ActivityWaDirectBinding
 import com.ahmadabuhasan.qrbarcode.utils.BaseActivity
 import com.google.android.gms.ads.AdRequest
+import java.net.URLEncoder
 
 class WaDirectActivity : BaseActivity() {
 
@@ -30,16 +31,20 @@ class WaDirectActivity : BaseActivity() {
         binding.adViewWaDirect.loadAd(AdRequest.Builder().build())
 
         binding.btnOpen.setOnClickListener {
-            viewModel.onOpenClicked(binding.editPhone.text?.toString() ?: "")
+            viewModel.onOpenClicked(
+                phone = binding.editPhone.text?.toString() ?: "",
+                countryCode = binding.ccp.selectedCountryCode,
+                message = binding.editMessage.text?.toString() ?: ""
+            )
         }
 
         observeViewModel()
     }
 
     private fun observeViewModel() {
-        viewModel.openWhatsApp.observe(this) { number ->
-            number ?: return@observe
-            openWhatsApp(number)
+        viewModel.openWhatsApp.observe(this) { params ->
+            params ?: return@observe
+            openWhatsApp(params.number, params.message)
             viewModel.onWhatsAppOpened()
         }
 
@@ -50,9 +55,14 @@ class WaDirectActivity : BaseActivity() {
         }
     }
 
-    private fun openWhatsApp(number: String) {
-        val uri = Uri.parse("https://wa.me/$number")
-        val intent = Intent(Intent.ACTION_VIEW, uri)
+    private fun openWhatsApp(number: String, message: String) {
+        val encodedMessage = URLEncoder.encode(message, "UTF-8")
+        val url = if (message.isNotEmpty()) {
+            "https://wa.me/$number?text=$encodedMessage"
+        } else {
+            "https://wa.me/$number"
+        }
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
         if (intent.resolveActivity(packageManager) != null) {
             startActivity(intent)
         } else {
