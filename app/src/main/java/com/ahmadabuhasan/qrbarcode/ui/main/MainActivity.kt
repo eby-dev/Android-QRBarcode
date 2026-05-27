@@ -1,4 +1,4 @@
-package com.ahmadabuhasan.qrbarcode
+package com.ahmadabuhasan.qrbarcode.ui.main
 
 import android.Manifest
 import android.content.Context
@@ -12,8 +12,12 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
+import com.ahmadabuhasan.qrbarcode.R
 import com.ahmadabuhasan.qrbarcode.databinding.ActivityMainBinding
+import com.ahmadabuhasan.qrbarcode.model.ScanAction
+import com.ahmadabuhasan.qrbarcode.ui.about.AboutActivity
 import com.ahmadabuhasan.qrbarcode.utils.BaseActivity
 import com.google.android.gms.ads.AdRequest
 import com.google.android.material.snackbar.Snackbar
@@ -32,11 +36,12 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler {
     companion object {
         private const val PERMISSION_CODE = 100
         private const val FLEXIBLE_APP_UPDATE_REQ_CODE = 123
-        private const val FLASH_STATE = "FLASH_STATE"
         private var pressedTime: Long = 0
     }
 
-    private var flashlight = false
+    // ViewModel — semua state & logic bisnis ada di sini
+    private val viewModel: MainViewModel by viewModels()
+
     private lateinit var zXingScannerView: ZXingScannerView
     private lateinit var appUpdateManager: AppUpdateManager
     private lateinit var installStateUpdatedListener: InstallStateUpdatedListener
@@ -72,31 +77,41 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler {
         zXingScannerView = ZXingScannerView(this)
         binding?.contentFrame?.addView(zXingScannerView)
 
-        flashOn()
-        flashOff()
+        setupFlashButtons()
+        observeViewModel()
     }
 
-    private fun flashOn() {
-        binding?.flashOn?.setOnClickListener {
-            binding?.flashOff?.visibility = View.VISIBLE
-            binding?.flashOn?.visibility = View.GONE
-            flashlight = !flashlight
-            zXingScannerView.setFlash(flashlight)
+    // Observe perubahan dari ViewModel dan update UI
+    private fun observeViewModel() {
+        viewModel.flashEnabled.observe(this) { enabled ->
+            zXingScannerView.setFlash(enabled)
+            binding?.flashOn?.visibility = if (enabled) View.GONE else View.VISIBLE
+            binding?.flashOff?.visibility = if (enabled) View.VISIBLE else View.GONE
+        }
+
+        viewModel.scanAction.observe(this) { action ->
+            action ?: return@observe  // null = sudah dikonsumsi, skip
+            when (action) {
+                is ScanAction.OpenUrl -> {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(action.url))
+                    startActivity(Intent.createChooser(intent, "Open with"))
+                }
+                is ScanAction.ShareText -> {
+                    val intent = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_TEXT, action.text)
+                    }
+                    startActivity(Intent.createChooser(intent, "Share"))
+                }
+            }
+            viewModel.onScanActionConsumed()
         }
     }
 
-    private fun flashOff() {
-        binding?.flashOff?.setOnClickListener {
-            binding?.flashOff?.visibility = View.GONE
-            binding?.flashOn?.visibility = View.VISIBLE
-            flashlight = !flashlight
-            zXingScannerView.setFlash(flashlight)
-        }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putBoolean(FLASH_STATE, flashlight)
+    // Activity hanya tahu "user tap flash" → delegasi ke ViewModel
+    private fun setupFlashButtons() {
+        binding?.flashOn?.setOnClickListener { viewModel.toggleFlash() }
+        binding?.flashOff?.setOnClickListener { viewModel.toggleFlash() }
     }
 
     override fun onResume() {
@@ -112,22 +127,10 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler {
         binding = null
     }
 
+    // Activity terima hasil scan → kirim ke ViewModel untuk diproses
     override fun handleResult(rawResult: Result) {
         Toast.makeText(this, rawResult.toString(), Toast.LENGTH_LONG).show()
-        val text = rawResult.toString()
-
-        if (text.startsWith("https://") || text.startsWith("http://")) {
-            val intent = Intent(Intent.ACTION_VIEW).apply {
-                data = Uri.parse(text)
-            }
-            startActivity(Intent.createChooser(intent, "Open with"))
-        } else {
-            val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, text)
-            }
-            startActivity(Intent.createChooser(intent, "Share"))
-        }
+        viewModel.handleScanResult(rawResult.toString())
 
         @Suppress("DEPRECATION")
         (getSystemService(Context.VIBRATOR_SERVICE) as Vibrator).vibrate(300)

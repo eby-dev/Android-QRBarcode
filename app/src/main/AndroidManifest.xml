@@ -22,9 +22,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.QRBarcode"
         tools:ignore="AllowBackup">
-        <activity android:name=".AboutActivity" />
+        <activity android:name=".ui.about.AboutActivity" />
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.main.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

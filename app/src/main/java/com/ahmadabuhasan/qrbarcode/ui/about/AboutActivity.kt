@@ -1,7 +1,9 @@
-package com.ahmadabuhasan.qrbarcode
+package com.ahmadabuhasan.qrbarcode.ui.about
 
 import android.os.Bundle
 import android.view.MenuItem
+import com.ahmadabuhasan.qrbarcode.BuildConfig
+import com.ahmadabuhasan.qrbarcode.R
 import com.ahmadabuhasan.qrbarcode.databinding.ActivityAboutBinding
 import com.ahmadabuhasan.qrbarcode.utils.BaseActivity
 import com.ahmadabuhasan.qrbarcode.utils.Utils
@@ -38,12 +40,6 @@ class AboutActivity : BaseActivity() {
         if (interstitialAd != null) {
             interstitialAd!!.show(this)
         } else {
-            startGame()
-        }
-    }
-
-    private fun startGame() {
-        if (interstitialAd == null) {
             Utils().loadAd(this)
         }
     }
