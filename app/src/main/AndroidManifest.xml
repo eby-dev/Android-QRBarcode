@@ -23,6 +23,17 @@
         android:theme="@style/Theme.QRBarcode"
         tools:ignore="AllowBackup">
         <activity android:name=".ui.about.AboutActivity" />
+        <activity android:name=".ui.qrgenerator.QrGeneratorActivity" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
         <activity
             android:name=".ui.wadirect.WaDirectActivity"
             android:theme="@style/Theme.QRBarcode.WaDirect" />

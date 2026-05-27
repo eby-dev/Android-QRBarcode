@@ -12,6 +12,11 @@
     <string name="wa_direct_not_installed">WhatsApp is not installed</string>
     <string name="wa_direct_message_hint">Message (optional)</string>
     <string name="version">Version:\u0020</string>
+    <string name="qr_generator">QR Generator</string>
+    <string name="qr_generator_hint">Text or URL</string>
+    <string name="qr_generator_generate">Generate</string>
+    <string name="qr_generator_share">Share QR</string>
+    <string name="qr_generator_empty">Please enter text or URL</string>
     <string name="flashOn">Flash On</string>
     <string name="flashOff">Flash Off</string>
 </resources>

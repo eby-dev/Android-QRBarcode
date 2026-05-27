@@ -18,6 +18,7 @@ import com.ahmadabuhasan.qrbarcode.R
 import com.ahmadabuhasan.qrbarcode.databinding.ActivityMainBinding
 import com.ahmadabuhasan.qrbarcode.model.ScanAction
 import com.ahmadabuhasan.qrbarcode.ui.about.AboutActivity
+import com.ahmadabuhasan.qrbarcode.ui.qrgenerator.QrGeneratorActivity
 import com.ahmadabuhasan.qrbarcode.ui.wadirect.WaDirectActivity
 import com.ahmadabuhasan.qrbarcode.utils.BaseActivity
 import com.google.android.gms.ads.AdRequest
@@ -155,6 +156,7 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.qr_generator -> startActivity(Intent(this, QrGeneratorActivity::class.java))
             R.id.wa_direct -> startActivity(Intent(this, WaDirectActivity::class.java))
             R.id.about -> startActivity(Intent(this, AboutActivity::class.java))
         }
