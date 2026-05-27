@@ -23,6 +23,7 @@
         android:theme="@style/Theme.QRBarcode"
         tools:ignore="AllowBackup">
         <activity android:name=".ui.about.AboutActivity" />
+        <activity android:name=".ui.wadirect.WaDirectActivity" />
         <activity
             android:name=".ui.main.MainActivity"
             android:exported="true">

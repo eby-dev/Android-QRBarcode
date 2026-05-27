@@ -18,6 +18,7 @@ import com.ahmadabuhasan.qrbarcode.R
 import com.ahmadabuhasan.qrbarcode.databinding.ActivityMainBinding
 import com.ahmadabuhasan.qrbarcode.model.ScanAction
 import com.ahmadabuhasan.qrbarcode.ui.about.AboutActivity
+import com.ahmadabuhasan.qrbarcode.ui.wadirect.WaDirectActivity
 import com.ahmadabuhasan.qrbarcode.utils.BaseActivity
 import com.google.android.gms.ads.AdRequest
 import com.google.android.material.snackbar.Snackbar
@@ -154,8 +155,9 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.about) {
-            startActivity(Intent(this, AboutActivity::class.java))
+        when (item.itemId) {
+            R.id.wa_direct -> startActivity(Intent(this, WaDirectActivity::class.java))
+            R.id.about -> startActivity(Intent(this, AboutActivity::class.java))
         }
         return super.onOptionsItemSelected(item)
     }
