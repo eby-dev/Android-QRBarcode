@@ -1,0 +1,227 @@
+package com.ahmadabuhasan.qrbarcode
+
+import android.Manifest
+import android.content.Context
+import android.content.Intent
+import android.content.IntentSender
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Bundle
+import android.os.Vibrator
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.widget.Toast
+import androidx.core.content.ContextCompat
+import com.ahmadabuhasan.qrbarcode.databinding.ActivityMainBinding
+import com.ahmadabuhasan.qrbarcode.utils.BaseActivity
+import com.google.android.gms.ads.AdRequest
+import com.google.android.material.snackbar.Snackbar
+import com.google.android.play.core.appupdate.AppUpdateInfo
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.InstallStateUpdatedListener
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.InstallStatus
+import com.google.android.play.core.install.model.UpdateAvailability
+import com.google.zxing.Result
+import me.dm7.barcodescanner.zxing.ZXingScannerView
+
+class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler {
+
+    companion object {
+        private const val PERMISSION_CODE = 100
+        private const val FLEXIBLE_APP_UPDATE_REQ_CODE = 123
+        private const val FLASH_STATE = "FLASH_STATE"
+        private var pressedTime: Long = 0
+    }
+
+    private var flashlight = false
+    private lateinit var zXingScannerView: ZXingScannerView
+    private lateinit var appUpdateManager: AppUpdateManager
+    private lateinit var installStateUpdatedListener: InstallStateUpdatedListener
+
+    private var binding: ActivityMainBinding? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding!!.root)
+
+        if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.CAMERA), PERMISSION_CODE)
+        }
+
+        appUpdateManager = AppUpdateManagerFactory.create(this)
+        checkUpdate()
+        installStateUpdatedListener = InstallStateUpdatedListener { state ->
+            when (state.installStatus()) {
+                InstallStatus.DOWNLOADED -> popupSnackBarForCompleteUpdate()
+                InstallStatus.INSTALLED -> removeInstallStateUpdateListener()
+                else -> Toast.makeText(
+                    applicationContext,
+                    "InstallStateUpdatedListener: state: ${state.installStatus()}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+
+        val adRequest = AdRequest.Builder().build()
+        binding?.adView?.loadAd(adRequest)
+
+        zXingScannerView = ZXingScannerView(this)
+        binding?.contentFrame?.addView(zXingScannerView)
+
+        flashOn()
+        flashOff()
+    }
+
+    private fun flashOn() {
+        binding?.flashOn?.setOnClickListener {
+            binding?.flashOff?.visibility = View.VISIBLE
+            binding?.flashOn?.visibility = View.GONE
+            flashlight = !flashlight
+            zXingScannerView.setFlash(flashlight)
+        }
+    }
+
+    private fun flashOff() {
+        binding?.flashOff?.setOnClickListener {
+            binding?.flashOff?.visibility = View.GONE
+            binding?.flashOn?.visibility = View.VISIBLE
+            flashlight = !flashlight
+            zXingScannerView.setFlash(flashlight)
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(FLASH_STATE, flashlight)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        zXingScannerView.setResultHandler(this)
+        zXingScannerView.setAspectTolerance(0.2f)
+        zXingScannerView.startCamera()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        zXingScannerView.stopCamera()
+        binding = null
+    }
+
+    override fun handleResult(rawResult: Result) {
+        Toast.makeText(this, rawResult.toString(), Toast.LENGTH_LONG).show()
+        val text = rawResult.toString()
+
+        if (text.startsWith("https://") || text.startsWith("http://")) {
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                data = Uri.parse(text)
+            }
+            startActivity(Intent.createChooser(intent, "Open with"))
+        } else {
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, text)
+            }
+            startActivity(Intent.createChooser(intent, "Share"))
+        }
+
+        @Suppress("DEPRECATION")
+        (getSystemService(Context.VIBRATOR_SERVICE) as Vibrator).vibrate(300)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == PERMISSION_CODE) {
+            val message = if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                "Camera permission granted"
+            } else {
+                "Camera permission denied"
+            }
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.optionmenu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.about) {
+            startActivity(Intent(this, AboutActivity::class.java))
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        @Suppress("DEPRECATION")
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == FLEXIBLE_APP_UPDATE_REQ_CODE) {
+            when (resultCode) {
+                RESULT_CANCELED -> Toast.makeText(applicationContext, "Update canceled by user! ", Toast.LENGTH_LONG).show()
+                RESULT_OK -> Toast.makeText(applicationContext, "Update success! ", Toast.LENGTH_LONG).show()
+                else -> {
+                    Toast.makeText(applicationContext, "Update failed! ", Toast.LENGTH_LONG).show()
+                    checkUpdate()
+                }
+            }
+        }
+    }
+
+    private fun checkUpdate() {
+        appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
+                appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)
+            ) {
+                startUpdateFlow(appUpdateInfo)
+            } else if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
+                popupSnackBarForCompleteUpdate()
+            }
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun startUpdateFlow(appUpdateInfo: AppUpdateInfo) {
+        try {
+            appUpdateManager.startUpdateFlowForResult(
+                appUpdateInfo,
+                AppUpdateType.FLEXIBLE,
+                this,
+                FLEXIBLE_APP_UPDATE_REQ_CODE
+            )
+        } catch (e: IntentSender.SendIntentException) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun popupSnackBarForCompleteUpdate() {
+        Snackbar.make(
+            findViewById(R.id.layout_activity_main),
+            "An update has just been downloaded.",
+            Snackbar.LENGTH_INDEFINITE
+        ).apply {
+            setAction("RESTART") { appUpdateManager.completeUpdate() }
+            setActionTextColor(ContextCompat.getColor(this@MainActivity, R.color.red))
+            show()
+        }
+    }
+
+    private fun removeInstallStateUpdateListener() {
+        appUpdateManager.unregisterListener(installStateUpdatedListener)
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        if (pressedTime + 2000 > System.currentTimeMillis()) {
+            finishAndRemoveTask()
+        } else {
+            Toast.makeText(this, "Press once again to exit", Toast.LENGTH_SHORT).show()
+        }
+        pressedTime = System.currentTimeMillis()
+    }
+}
