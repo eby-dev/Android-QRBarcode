@@ -16,6 +16,9 @@ env:
   KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
   FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
   FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+  ADMOB_APPLICATION_ID: ${{ secrets.ADMOB_APPLICATION_ID }}
+  BANNER_AD_ID: ${{ secrets.BANNER_AD_ID }}
+  INTERSTITIAL_AD_ID: ${{ secrets.INTERSTITIAL_AD_ID }}
 
 jobs:
   setup:
@@ -114,6 +117,9 @@ jobs:
           echo "KEYSTORE_PASSWORD=${{ env.KEYSTORE_PASSWORD }}" >> local.properties
           echo "KEY_ALIAS=${{ env.KEY_ALIAS }}" >> local.properties
           echo "KEY_PASSWORD=${{ env.KEY_PASSWORD }}" >> local.properties
+          echo "admob_application_id=${{ env.ADMOB_APPLICATION_ID }}" >> local.properties
+          echo "banner_ad_id=${{ env.BANNER_AD_ID }}" >> local.properties
+          echo "interstitial_ad_id=${{ env.INTERSTITIAL_AD_ID }}" >> local.properties
 
       - name: Grant gradlew permission
         run: chmod +x ./gradlew

@@ -2,7 +2,6 @@ package com.ahmadabuhasan.qrbarcode.utils
 
 import android.content.Context
 import android.util.Log
-import com.ahmadabuhasan.qrbarcode.R
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
@@ -21,7 +20,7 @@ class Utils {
         val adRequest = AdRequest.Builder().build()
         InterstitialAd.load(
             context,
-            context.getString(R.string.AdMob_Interstitial_Ads_ID),
+            AppConfig.interstitialAdId(),
             adRequest,
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(mInterstitialAd: InterstitialAd) {

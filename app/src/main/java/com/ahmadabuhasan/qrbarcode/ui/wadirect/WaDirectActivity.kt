@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import com.ahmadabuhasan.qrbarcode.R
 import com.ahmadabuhasan.qrbarcode.databinding.ActivityWaDirectBinding
+import com.ahmadabuhasan.qrbarcode.utils.AppConfig
 import com.ahmadabuhasan.qrbarcode.utils.BaseActivity
 import com.google.android.gms.ads.AdRequest
 import java.net.URLEncoder
@@ -28,6 +29,7 @@ class WaDirectActivity : BaseActivity() {
             setTitle(R.string.wa_direct)
         }
 
+        binding.adViewWaDirect.adUnitId = AppConfig.bannerAdId()
         binding.adViewWaDirect.loadAd(AdRequest.Builder().build())
 
         binding.btnOpen.setOnClickListener {

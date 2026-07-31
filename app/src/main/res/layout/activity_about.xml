@@ -50,8 +50,7 @@
             android:id="@+id/adViewAbout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:adSize="BANNER"
-            app:adUnitId="@string/AdMob_Banner_Ads_ID" />
+            app:adSize="BANNER" />
 
     </LinearLayout>
 

@@ -24,6 +24,32 @@ if (localPropertiesFile.exists()) {
     localProperties.setProperty("KEY_PASSWORD", System.getenv("KEY_PASSWORD"))
 }
 
+def readSecret = { String propKey, String envKey ->
+    def value = localProperties.getProperty(propKey) ?: System.getenv(envKey)
+    return (value == null || value.trim().isEmpty()) ? null : value.trim()
+}
+
+// Google's official AdMob test IDs — safe to hardcode
+// https://developers.google.com/admob/android/test-ads
+def testAdAppId = 'ca-app-pub-3940256099942544~3347511713'
+def testBannerAdId = 'ca-app-pub-3940256099942544/6300978111'
+def testInterstitialAdId = 'ca-app-pub-3940256099942544/1033173712'
+
+// Release secrets — fall back to test IDs when missing so CI keeps working
+// while the real AdMob account is suspended. Tighten this back to a hard
+// failure once the account is reinstated.
+def releaseAdAppId = readSecret('admob_application_id', 'ADMOB_APPLICATION_ID')
+def releaseBannerAdId = readSecret('banner_ad_id', 'BANNER_AD_ID')
+def releaseInterstitialAdId = readSecret('interstitial_ad_id', 'INTERSTITIAL_AD_ID')
+
+def usingReleaseFallback = []
+if (!releaseAdAppId) { releaseAdAppId = testAdAppId; usingReleaseFallback << 'admob_application_id' }
+if (!releaseBannerAdId) { releaseBannerAdId = testBannerAdId; usingReleaseFallback << 'banner_ad_id' }
+if (!releaseInterstitialAdId) { releaseInterstitialAdId = testInterstitialAdId; usingReleaseFallback << 'interstitial_ad_id' }
+if (!usingReleaseFallback.isEmpty()) {
+    logger.warn("[AdMob] Using Google test IDs for release secret(s) ${usingReleaseFallback.join(', ')} — do NOT ship this to production users")
+}
+
 android {
     signingConfigs {
         release {
@@ -45,6 +71,16 @@ android {
         versionName "1.0.7"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters "arm64-v8a", "armeabi-v7a", "x86_64"
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+        }
     }
 
     buildTypes {
@@ -54,18 +90,26 @@ android {
             versionNameSuffix " build:" + BUILD_DATE
             signingConfig signingConfigs.release
 
-            resValue "string", "AdMob_Application_ID", "ca-app-pub-8638037215789792~4727326309"
-            resValue "string", "AdMob_Banner_Ads_ID", "ca-app-pub-8638037215789792/7935494830"
-            resValue "string", "AdMob_Interstitial_Ads_ID", "ca-app-pub-8638037215789792/1721440279"
+            resValue "string", "AdMob_Application_ID", releaseAdAppId
+
+            externalNativeBuild {
+                cmake {
+                    cppFlags "-Dbanner_ad_id=${releaseBannerAdId}",
+                            "-Dinterstitial_ad_id=${releaseInterstitialAdId}"
+                }
+            }
         }
         debug {
             debuggable true
 
-            // Google's official AdMob test IDs — safe to use in development
-            // https://developers.google.com/admob/android/test-ads
-            resValue "string", "AdMob_Application_ID", "ca-app-pub-3940256099942544~3347511713"
-            resValue "string", "AdMob_Banner_Ads_ID", "ca-app-pub-3940256099942544/6300978111"
-            resValue "string", "AdMob_Interstitial_Ads_ID", "ca-app-pub-3940256099942544/1033173712"
+            resValue "string", "AdMob_Application_ID", testAdAppId
+
+            externalNativeBuild {
+                cmake {
+                    cppFlags "-Dbanner_ad_id=${testBannerAdId}",
+                            "-Dinterstitial_ad_id=${testInterstitialAdId}"
+                }
+            }
         }
     }
 

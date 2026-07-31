@@ -11,6 +11,7 @@ import androidx.activity.viewModels
 import androidx.core.content.FileProvider
 import com.ahmadabuhasan.qrbarcode.R
 import com.ahmadabuhasan.qrbarcode.databinding.ActivityQrGeneratorBinding
+import com.ahmadabuhasan.qrbarcode.utils.AppConfig
 import com.ahmadabuhasan.qrbarcode.utils.BaseActivity
 import com.google.android.gms.ads.AdRequest
 import java.io.File
@@ -32,6 +33,7 @@ class QrGeneratorActivity : BaseActivity() {
             setTitle(R.string.qr_generator)
         }
 
+        binding.adViewQrGenerator.adUnitId = AppConfig.bannerAdId()
         binding.adViewQrGenerator.loadAd(AdRequest.Builder().build())
 
         binding.btnGenerate.setOnClickListener {

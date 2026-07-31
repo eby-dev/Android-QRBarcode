@@ -21,6 +21,7 @@ import com.ahmadabuhasan.qrbarcode.ui.about.AboutActivity
 import com.ahmadabuhasan.qrbarcode.ui.history.HistoryActivity
 import com.ahmadabuhasan.qrbarcode.ui.qrgenerator.QrGeneratorActivity
 import com.ahmadabuhasan.qrbarcode.ui.wadirect.WaDirectActivity
+import com.ahmadabuhasan.qrbarcode.utils.AppConfig
 import com.ahmadabuhasan.qrbarcode.utils.BaseActivity
 import com.google.android.gms.ads.AdRequest
 import com.google.android.material.snackbar.Snackbar
@@ -74,8 +75,8 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler {
             }
         }
 
-        val adRequest = AdRequest.Builder().build()
-        binding.adView?.loadAd(adRequest)
+        binding.adView?.adUnitId = AppConfig.bannerAdId()
+        binding.adView?.loadAd(AdRequest.Builder().build())
 
         zXingScannerView = ZXingScannerView(this)
         binding.contentFrame?.addView(zXingScannerView)

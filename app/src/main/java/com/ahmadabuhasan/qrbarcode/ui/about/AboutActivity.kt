@@ -5,6 +5,7 @@ import android.view.MenuItem
 import com.ahmadabuhasan.qrbarcode.BuildConfig
 import com.ahmadabuhasan.qrbarcode.R
 import com.ahmadabuhasan.qrbarcode.databinding.ActivityAboutBinding
+import com.ahmadabuhasan.qrbarcode.utils.AppConfig
 import com.ahmadabuhasan.qrbarcode.utils.BaseActivity
 import com.ahmadabuhasan.qrbarcode.utils.Utils
 import com.ahmadabuhasan.qrbarcode.utils.Utils.Companion.interstitialAd
@@ -29,6 +30,7 @@ class AboutActivity : BaseActivity() {
 
         Utils().loadAd(this)
         showInterstitial()
+        binding.adViewAbout.adUnitId = AppConfig.bannerAdId()
         binding.adViewAbout.loadAd(AdRequest.Builder().build())
     }
 
