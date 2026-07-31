@@ -5,4 +5,7 @@
     <color name="red">#FFFF0000</color>
     <color name="wa_green">#FF25D366</color>
     <color name="wa_green_dark">#FF128C7E</color>
+
+    <!-- Auto-adaptive content color for the CountryCodePicker (has night override). -->
+    <color name="ccp_content">#FF000000</color>
 </resources>

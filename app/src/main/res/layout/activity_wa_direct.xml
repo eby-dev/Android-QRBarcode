@@ -22,6 +22,8 @@
             android:id="@+id/ccp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:ccp_arrowColor="@color/ccp_content"
+            app:ccp_contentColor="@color/ccp_content"
             app:ccp_defaultNameCode="ID"
             app:ccp_showFlag="true"
             app:ccp_showFullName="false" />

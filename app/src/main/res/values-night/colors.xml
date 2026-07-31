@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Overrides values/colors.xml under system dark mode. -->
+    <color name="ccp_content">#FFFFFFFF</color>
+</resources>
