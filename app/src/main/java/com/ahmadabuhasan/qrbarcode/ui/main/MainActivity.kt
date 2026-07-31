@@ -18,6 +18,7 @@ import com.ahmadabuhasan.qrbarcode.R
 import com.ahmadabuhasan.qrbarcode.databinding.ActivityMainBinding
 import com.ahmadabuhasan.qrbarcode.model.ScanAction
 import com.ahmadabuhasan.qrbarcode.ui.about.AboutActivity
+import com.ahmadabuhasan.qrbarcode.ui.history.HistoryActivity
 import com.ahmadabuhasan.qrbarcode.ui.qrgenerator.QrGeneratorActivity
 import com.ahmadabuhasan.qrbarcode.ui.wadirect.WaDirectActivity
 import com.ahmadabuhasan.qrbarcode.utils.BaseActivity
@@ -131,7 +132,10 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler {
     // Activity terima hasil scan → kirim ke ViewModel untuk diproses
     override fun handleResult(rawResult: Result) {
         Toast.makeText(this, rawResult.toString(), Toast.LENGTH_LONG).show()
-        viewModel.handleScanResult(rawResult.toString())
+        viewModel.handleScanResult(
+            text = rawResult.text ?: rawResult.toString(),
+            format = rawResult.barcodeFormat?.name ?: "UNKNOWN"
+        )
 
         @Suppress("DEPRECATION")
         (getSystemService(Context.VIBRATOR_SERVICE) as Vibrator).vibrate(300)
@@ -156,6 +160,7 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.history -> startActivity(Intent(this, HistoryActivity::class.java))
             R.id.qr_generator -> startActivity(Intent(this, QrGeneratorActivity::class.java))
             R.id.wa_direct -> startActivity(Intent(this, WaDirectActivity::class.java))
             R.id.about -> startActivity(Intent(this, AboutActivity::class.java))

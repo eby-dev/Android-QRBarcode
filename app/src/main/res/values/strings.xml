@@ -19,4 +19,16 @@
     <string name="qr_generator_empty">Please enter text or URL</string>
     <string name="flashOn">Flash On</string>
     <string name="flashOff">Flash Off</string>
+
+    <string name="history">History</string>
+    <string name="history_empty">No scans yet</string>
+    <string name="history_meta_format">%1$s • %2$s</string>
+    <string name="history_open">Open</string>
+    <string name="history_copy">Copy</string>
+    <string name="history_share">Share</string>
+    <string name="history_delete">Delete</string>
+    <string name="history_copied">Copied to clipboard</string>
+    <string name="history_confirm_delete">Delete this entry?</string>
+    <string name="history_clear_all">Clear all</string>
+    <string name="history_confirm_clear_all">Delete all scan history?</string>
 </resources>

@@ -23,6 +23,7 @@
         android:theme="@style/Theme.QRBarcode"
         tools:ignore="AllowBackup">
         <activity android:name=".ui.about.AboutActivity" />
+        <activity android:name=".ui.history.HistoryActivity" />
         <activity android:name=".ui.qrgenerator.QrGeneratorActivity" />
 
         <provider
