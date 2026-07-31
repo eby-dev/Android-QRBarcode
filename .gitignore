@@ -26,3 +26,7 @@ private_key.pepk
 
 # GOOGLE_PLAY_JSON
 /app/qrbarcode-8b0b8-aaefa03b2374.json
+
+# Firebase service account keys (never commit — GitHub Secret is the source of truth)
+*firebase-adminsdk*.json
+firebase-sa.json
