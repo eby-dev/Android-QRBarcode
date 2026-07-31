@@ -4,14 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <FrameLayout
-        android:id="@+id/adViewWaDirectContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <!-- Row: Country picker + phone number, dibungkus LinearLayout supaya sejajar -->
     <LinearLayout
         android:id="@+id/rowPhone"
@@ -24,7 +16,7 @@
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/adViewWaDirectContainer">
+        app:layout_constraintTop_toTopOf="parent">
 
         <com.hbb20.CountryCodePicker
             android:id="@+id/ccp"

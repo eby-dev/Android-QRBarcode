@@ -12,7 +12,7 @@
         android:layout_height="200dp"
         android:contentDescription="@string/app_name"
         android:src="@drawable/qrbarcode"
-        app:layout_constraintBottom_toTopOf="@id/container_ads"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -36,21 +36,5 @@
         android:textColor="@color/black"
         android:textSize="14sp"
         app:layout_constraintTop_toBottomOf="@+id/app_name" />
-
-    <LinearLayout
-        android:id="@+id/container_ads"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="10dp"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <FrameLayout
-            android:id="@+id/adViewAboutContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

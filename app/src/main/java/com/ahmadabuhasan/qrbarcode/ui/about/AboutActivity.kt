@@ -5,13 +5,7 @@ import android.view.MenuItem
 import com.ahmadabuhasan.qrbarcode.BuildConfig
 import com.ahmadabuhasan.qrbarcode.R
 import com.ahmadabuhasan.qrbarcode.databinding.ActivityAboutBinding
-import com.ahmadabuhasan.qrbarcode.utils.AppConfig
 import com.ahmadabuhasan.qrbarcode.utils.BaseActivity
-import com.ahmadabuhasan.qrbarcode.utils.Utils
-import com.ahmadabuhasan.qrbarcode.utils.Utils.Companion.interstitialAd
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdSize
-import com.google.android.gms.ads.AdView
 
 class AboutActivity : BaseActivity() {
 
@@ -29,24 +23,6 @@ class AboutActivity : BaseActivity() {
         }
 
         binding.version.text = getString(R.string.version) + BuildConfig.VERSION_NAME
-
-        Utils().loadAd(this)
-        showInterstitial()
-
-        val adView = AdView(this).apply {
-            adUnitId = AppConfig.bannerAdId()
-            setAdSize(AdSize.BANNER)
-        }
-        binding.adViewAboutContainer.addView(adView)
-        adView.loadAd(AdRequest.Builder().build())
-    }
-
-    private fun showInterstitial() {
-        if (interstitialAd != null) {
-            interstitialAd!!.show(this)
-        } else {
-            Utils().loadAd(this)
-        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
