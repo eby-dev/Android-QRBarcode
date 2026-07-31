@@ -11,6 +11,8 @@ import com.ahmadabuhasan.qrbarcode.databinding.ActivityWaDirectBinding
 import com.ahmadabuhasan.qrbarcode.utils.AppConfig
 import com.ahmadabuhasan.qrbarcode.utils.BaseActivity
 import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
 import java.net.URLEncoder
 
 class WaDirectActivity : BaseActivity() {
@@ -29,8 +31,12 @@ class WaDirectActivity : BaseActivity() {
             setTitle(R.string.wa_direct)
         }
 
-        binding.adViewWaDirect.adUnitId = AppConfig.bannerAdId()
-        binding.adViewWaDirect.loadAd(AdRequest.Builder().build())
+        val adView = AdView(this).apply {
+            adUnitId = AppConfig.bannerAdId()
+            setAdSize(AdSize.BANNER)
+        }
+        binding.adViewWaDirectContainer.addView(adView)
+        adView.loadAd(AdRequest.Builder().build())
 
         binding.btnOpen.setOnClickListener {
             viewModel.onOpenClicked(

@@ -46,11 +46,10 @@
         android:padding="10dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <com.google.android.gms.ads.AdView
-            android:id="@+id/adViewAbout"
+        <FrameLayout
+            android:id="@+id/adViewAboutContainer"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:adSize="BANNER" />
+            android:layout_height="wrap_content" />
 
     </LinearLayout>
 

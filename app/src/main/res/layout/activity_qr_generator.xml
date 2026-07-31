@@ -4,11 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.google.android.gms.ads.AdView
-        android:id="@+id/adViewQrGenerator"
+    <FrameLayout
+        android:id="@+id/adViewQrGeneratorContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:adSize="BANNER"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -24,7 +23,7 @@
         android:hint="@string/qr_generator_hint"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/adViewQrGenerator">
+        app:layout_constraintTop_toBottomOf="@id/adViewQrGeneratorContainer">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/editContent"

@@ -10,6 +10,8 @@ import com.ahmadabuhasan.qrbarcode.utils.BaseActivity
 import com.ahmadabuhasan.qrbarcode.utils.Utils
 import com.ahmadabuhasan.qrbarcode.utils.Utils.Companion.interstitialAd
 import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
 
 class AboutActivity : BaseActivity() {
 
@@ -30,8 +32,13 @@ class AboutActivity : BaseActivity() {
 
         Utils().loadAd(this)
         showInterstitial()
-        binding.adViewAbout.adUnitId = AppConfig.bannerAdId()
-        binding.adViewAbout.loadAd(AdRequest.Builder().build())
+
+        val adView = AdView(this).apply {
+            adUnitId = AppConfig.bannerAdId()
+            setAdSize(AdSize.BANNER)
+        }
+        binding.adViewAboutContainer.addView(adView)
+        adView.loadAd(AdRequest.Builder().build())
     }
 
     private fun showInterstitial() {
