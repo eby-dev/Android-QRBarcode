@@ -53,9 +53,19 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             versionNameSuffix " build:" + BUILD_DATE
             signingConfig signingConfigs.release
+
+            resValue "string", "AdMob_Application_ID", "ca-app-pub-8638037215789792~4727326309"
+            resValue "string", "AdMob_Banner_Ads_ID", "ca-app-pub-8638037215789792/7935494830"
+            resValue "string", "AdMob_Interstitial_Ads_ID", "ca-app-pub-8638037215789792/1721440279"
         }
         debug {
             debuggable true
+
+            // Google's official AdMob test IDs — safe to use in development
+            // https://developers.google.com/admob/android/test-ads
+            resValue "string", "AdMob_Application_ID", "ca-app-pub-3940256099942544~3347511713"
+            resValue "string", "AdMob_Banner_Ads_ID", "ca-app-pub-3940256099942544/6300978111"
+            resValue "string", "AdMob_Interstitial_Ads_ID", "ca-app-pub-3940256099942544/1033173712"
         }
     }
 
