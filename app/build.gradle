@@ -61,12 +61,13 @@ android {
     }
 
     namespace 'com.ahmadabuhasan.qrbarcode'
-    compileSdkVersion 35
+    compileSdkVersion 36
+    buildToolsVersion "36.1.0"
 
     defaultConfig {
         applicationId "com.ahmadabuhasan.qrbarcode"
         minSdkVersion 23
-        targetSdkVersion 35
+        targetSdkVersion 36
         versionCode 9
         versionName "1.0.8"
 
