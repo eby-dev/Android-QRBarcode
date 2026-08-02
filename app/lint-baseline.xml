@@ -47,17 +47,6 @@
 
     <issue
         id="Instantiatable"
-        message="`AdView` must extend android.view.View"
-        errorLine1="        &lt;com.google.android.gms.ads.AdView"
-        errorLine2="        ^">
-        <location
-            file="src/main/res/layout/activity_about.xml"
-            line="49"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="Instantiatable"
         message="`TextInputEditText` must extend android.view.View"
         errorLine1="        &lt;com.google.android.material.textfield.TextInputEditText"
         errorLine2="        ^">
