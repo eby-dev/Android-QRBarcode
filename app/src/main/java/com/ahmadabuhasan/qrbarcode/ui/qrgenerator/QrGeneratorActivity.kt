@@ -11,11 +11,11 @@ import androidx.activity.viewModels
 import androidx.core.content.FileProvider
 import com.ahmadabuhasan.qrbarcode.R
 import com.ahmadabuhasan.qrbarcode.databinding.ActivityQrGeneratorBinding
-import com.ahmadabuhasan.qrbarcode.utils.AppConfig
 import com.ahmadabuhasan.qrbarcode.utils.BaseActivity
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdSize
-import com.google.android.gms.ads.AdView
+// import com.ahmadabuhasan.qrbarcode.utils.AppConfig
+// import com.google.android.gms.ads.AdRequest
+// import com.google.android.gms.ads.AdSize
+// import com.google.android.gms.ads.AdView
 import java.io.File
 import java.io.FileOutputStream
 
@@ -35,12 +35,14 @@ class QrGeneratorActivity : BaseActivity() {
             setTitle(R.string.qr_generator)
         }
 
-        val adView = AdView(this).apply {
-            adUnitId = AppConfig.bannerAdId()
-            setAdSize(AdSize.BANNER)
-        }
-        binding.adViewQrGeneratorContainer.addView(adView)
-        adView.loadAd(AdRequest.Builder().build())
+        // Banner disabled while AdMob publisher pub-8638037215789792 is suspended.
+        binding.adViewQrGeneratorContainer.visibility = View.GONE
+        // val adView = AdView(this).apply {
+        //     adUnitId = AppConfig.bannerAdId()
+        //     setAdSize(AdSize.BANNER)
+        // }
+        // binding.adViewQrGeneratorContainer.addView(adView)
+        // adView.loadAd(AdRequest.Builder().build())
 
         binding.btnGenerate.setOnClickListener {
             viewModel.generate(binding.editContent.text?.toString() ?: "")
