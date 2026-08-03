@@ -8,3 +8,5 @@ add_library(
         SHARED
         src/main/cpp/native-lib.cpp
 )
+
+#target_link_options(native-lib PRIVATE "-Wl,-z,max-page-size=16384")
