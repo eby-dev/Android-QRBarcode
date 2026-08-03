@@ -50,13 +50,9 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
-        <!--
-        AdMob disabled while publisher pub-8638037215789792 is suspended
-        for invalid traffic (29-day suspension notified 2026-07-24).
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="@string/AdMob_Application_ID" />
-        -->
     </application>
 
 </manifest>
