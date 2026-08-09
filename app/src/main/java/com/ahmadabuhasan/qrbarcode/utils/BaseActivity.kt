@@ -1,6 +1,5 @@
 package com.ahmadabuhasan.qrbarcode.utils
 
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -16,24 +15,22 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     private fun applyEdgeToEdge() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
-            val content = findViewById<View>(android.R.id.content)
-            ViewCompat.setOnApplyWindowInsetsListener(content) { view, insets ->
-                val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-                val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
+        val content = findViewById<View>(android.R.id.content)
+        ViewCompat.setOnApplyWindowInsetsListener(content) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
 
-                view.setPadding(
-                    bars.left,
-                    bars.top,
-                    bars.right,
-                    maxOf(ime.bottom, bars.bottom)
-                )
+            view.setPadding(
+                bars.left,
+                bars.top,
+                bars.right,
+                maxOf(ime.bottom, bars.bottom)
+            )
 
-                insets
-            }
-            ViewCompat.requestApplyInsets(content)
+            insets
         }
+        ViewCompat.requestApplyInsets(content)
     }
 }

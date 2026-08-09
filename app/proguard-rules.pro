@@ -19,3 +19,9 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Aggressive R8 optimizations — enables Play Console's "Repackage Classes"
+# metric. Requires uploading mapping.txt to Play Console for readable
+# release stack traces.
+-repackageclasses ''
+-allowaccessmodification
