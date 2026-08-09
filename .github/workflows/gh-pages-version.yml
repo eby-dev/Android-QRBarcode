@@ -1,0 +1,61 @@
+name: Sync version to gh-pages
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'app/build.gradle'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-version:
+    name: Sync versionName to gh-pages index.html
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          path: master
+          fetch-depth: 1
+
+      - name: Extract versionName from build.gradle
+        id: version
+        run: |
+          VERSION=$(grep -oP 'versionName\s+"\K[^"]+' master/app/build.gradle)
+          if [ -z "$VERSION" ]; then
+            echo "Failed to extract versionName from app/build.gradle" >&2
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Detected versionName: $VERSION"
+
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+          fetch-depth: 1
+
+      - name: Update index.html
+        run: |
+          cd gh-pages
+          sed -i -E "s|QRBarcode v[0-9]+\.[0-9]+\.[0-9]+|QRBarcode v${{ steps.version.outputs.version }}|" index.html
+
+      - name: Commit and push if changed
+        run: |
+          cd gh-pages
+          if git diff --quiet index.html; then
+            echo "gh-pages already at v${{ steps.version.outputs.version }} — nothing to do."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Update QRBarcode v${{ steps.version.outputs.version }}"
+          git push
