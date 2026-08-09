@@ -132,6 +132,7 @@ jobs:
         with:
           name: release-aab
           path: app/build/outputs/bundle/release/*.aab
+          retention-days: 3
 
       # 🧹 Cleanup
       - name: Cleanup secrets
@@ -201,6 +202,7 @@ jobs:
             app/build/reports/**/*.html
             app/build/intermediates/lint_intermediate_text_report/**/*.txt
             app/build/reports/lint-baseline.xml
+          retention-days: 3
 
   deploy-release:
     name: Deploy to Play Store (Production)
