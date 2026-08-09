@@ -10,7 +10,7 @@ The terms used in this Privacy Policy have the same meanings as in our Terms and
 
 **Information Collection and Use**
 
-For a better experience, while using our Service, I may require you to provide us with certain personally identifiable information, including but not limited to android.permission.ACCESS_NETWORK_STATE, android.permission.CAMERA, android.permission.FLASHLIGHT, android.permission.INTERNET, android.permission.VIBRATE, android.permission.WAKE_LOCK, com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE. The information that I request will be retained on your device and is not collected by me in any way.
+For a better experience, while using our Service, I may require you to provide us with certain personally identifiable information, including but not limited to android.permission.ACCESS_NETWORK_STATE, android.permission.CAMERA, android.permission.FLASHLIGHT, android.permission.INTERNET, android.permission.VIBRATE, android.permission.WAKE_LOCK. The information that I request will be retained on your device and is not collected by me in any way.
 
 The app does use third-party services that may collect information used to identify you.
 
@@ -19,6 +19,10 @@ Link to the privacy policy of third-party service providers used by the app
 - [Google Play Services](https://www.google.com/policies/privacy/)
 - [AdMob](https://support.google.com/admob/answer/6128543?hl=en)
 - [Google Analytics for Firebase](https://firebase.google.com/policies/analytics)
+
+**Locally Stored Data**
+
+The app saves your scan history (content, format, and timestamp of each scan) in a local database on your device. This data is not transmitted anywhere and never leaves your device. You can delete individual entries or clear the entire history at any time from the History screen.
 
 **Log Data**
 
