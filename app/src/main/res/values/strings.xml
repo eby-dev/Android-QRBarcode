@@ -16,6 +16,9 @@
     <string name="qr_generator_empty">Please enter text or URL</string>
     <string name="flashOn">Flash On</string>
     <string name="flashOff">Flash Off</string>
+    <string name="scan_from_gallery">Scan from Gallery</string>
+    <string name="scan_from_gallery_no_result">No QR/barcode found in image</string>
+    <string name="scan_from_gallery_read_failed">Failed to read image</string>
 
     <string name="history">History</string>
     <string name="history_empty">No scans yet</string>

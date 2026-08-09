@@ -12,6 +12,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import com.ahmadabuhasan.qrbarcode.R
@@ -53,6 +55,12 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler {
     private lateinit var installStateUpdatedListener: InstallStateUpdatedListener
 
     private lateinit var binding: ActivityMainBinding
+
+    private val pickImageLauncher = registerForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri: Uri? ->
+        uri?.let { viewModel.decodeImageFromUri(it) }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -118,6 +126,16 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler {
             }
             viewModel.onScanActionConsumed()
         }
+
+        viewModel.galleryDecodeError.observe(this) { error ->
+            error ?: return@observe
+            val msgRes = when (error) {
+                MainViewModel.GalleryDecodeError.NoResult -> R.string.scan_from_gallery_no_result
+                MainViewModel.GalleryDecodeError.ReadFailed -> R.string.scan_from_gallery_read_failed
+            }
+            Toast.makeText(this, msgRes, Toast.LENGTH_LONG).show()
+            viewModel.onGalleryDecodeErrorConsumed()
+        }
     }
 
     // Activity hanya tahu "user tap flash" → delegasi ke ViewModel
@@ -169,6 +187,9 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.scan_from_gallery -> pickImageLauncher.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+            )
             R.id.history -> startActivity(Intent(this, HistoryActivity::class.java))
             R.id.qr_generator -> startActivity(Intent(this, QrGeneratorActivity::class.java))
             R.id.wa_direct -> startActivity(Intent(this, WaDirectActivity::class.java))

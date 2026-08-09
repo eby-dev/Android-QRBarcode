@@ -3,6 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/scan_from_gallery"
+        android:title="@string/scan_from_gallery"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/history"
         android:title="@string/history"
         app:showAsAction="never" />
