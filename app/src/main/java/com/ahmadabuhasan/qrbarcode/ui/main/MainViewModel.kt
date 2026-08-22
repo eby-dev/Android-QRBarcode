@@ -48,7 +48,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val isUrl = ScanContentParser.parse(text) is ScanContent.Url
 
         viewModelScope.launch {
-            dao.insert(
+            dao.upsert(
                 ScanHistoryEntity(
                     content = text,
                     format = format,
