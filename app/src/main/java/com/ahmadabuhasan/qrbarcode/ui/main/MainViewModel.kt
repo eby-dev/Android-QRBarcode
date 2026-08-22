@@ -9,7 +9,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ahmadabuhasan.qrbarcode.data.AppDatabase
 import com.ahmadabuhasan.qrbarcode.data.ScanHistoryEntity
-import com.ahmadabuhasan.qrbarcode.model.ScanAction
+import com.ahmadabuhasan.qrbarcode.model.ScanResult
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.DecodeHintType
 import com.google.zxing.MultiFormatReader
@@ -33,11 +33,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // --- Scan result ---
-    // null = action sudah dikonsumsi Activity, supaya tidak trigger ulang saat screen rotation
-    private val _scanAction = MutableLiveData<ScanAction?>()
-    val scanAction: LiveData<ScanAction?> = _scanAction
+    // null = sudah dikonsumsi Activity (mis. bottom sheet sudah ditampilkan)
+    private val _scanResult = MutableLiveData<ScanResult?>()
+    val scanResult: LiveData<ScanResult?> = _scanResult
 
-    // --- Gallery-decode result signals (String res id, null = consumed) ---
+    // --- Gallery-decode error signals (null = consumed) ---
     sealed class GalleryDecodeError { object NoResult : GalleryDecodeError(); object ReadFailed : GalleryDecodeError() }
     private val _galleryDecodeError = MutableLiveData<GalleryDecodeError?>()
     val galleryDecodeError: LiveData<GalleryDecodeError?> = _galleryDecodeError
@@ -56,11 +56,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             )
         }
 
-        _scanAction.value = if (isUrl) ScanAction.OpenUrl(text) else ScanAction.ShareText(text)
+        _scanResult.value = ScanResult(text = text, format = format, isUrl = isUrl)
     }
 
-    fun onScanActionConsumed() {
-        _scanAction.value = null
+    fun onScanResultConsumed() {
+        _scanResult.value = null
     }
 
     fun onGalleryDecodeErrorConsumed() {

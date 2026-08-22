@@ -20,6 +20,15 @@
     <string name="scan_from_gallery_no_result">No QR/barcode found in image</string>
     <string name="scan_from_gallery_read_failed">Failed to read image</string>
 
+    <string name="scan_result_title">Scan result</string>
+    <string name="scan_result_type_url">URL</string>
+    <string name="scan_result_type_text">Text</string>
+    <string name="scan_result_copy">Copy</string>
+    <string name="scan_result_open">Open</string>
+    <string name="scan_result_share">Share</string>
+    <string name="scan_result_scan_again">Scan again</string>
+    <string name="scan_result_copied">Copied to clipboard</string>
+
     <string name="history">History</string>
     <string name="history_empty">No scans yet</string>
     <string name="history_meta_format">%1$s • %2$s</string>

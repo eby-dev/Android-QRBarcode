@@ -18,7 +18,6 @@ import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import com.ahmadabuhasan.qrbarcode.R
 import com.ahmadabuhasan.qrbarcode.databinding.ActivityMainBinding
-import com.ahmadabuhasan.qrbarcode.model.ScanAction
 import com.ahmadabuhasan.qrbarcode.ui.about.AboutActivity
 import com.ahmadabuhasan.qrbarcode.ui.history.HistoryActivity
 import com.ahmadabuhasan.qrbarcode.ui.qrgenerator.QrGeneratorActivity
@@ -39,7 +38,7 @@ import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.zxing.Result
 import me.dm7.barcodescanner.zxing.ZXingScannerView
 
-class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler {
+class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler, ScanResultBottomSheet.Listener {
 
     companion object {
         private const val PERMISSION_CODE = 100
@@ -109,22 +108,13 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler {
             binding.flashOff?.visibility = if (enabled) View.VISIBLE else View.GONE
         }
 
-        viewModel.scanAction.observe(this) { action ->
-            action ?: return@observe  // null = sudah dikonsumsi, skip
-            when (action) {
-                is ScanAction.OpenUrl -> {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(action.url))
-                    startActivity(Intent.createChooser(intent, "Open with"))
-                }
-                is ScanAction.ShareText -> {
-                    val intent = Intent(Intent.ACTION_SEND).apply {
-                        type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, action.text)
-                    }
-                    startActivity(Intent.createChooser(intent, "Share"))
-                }
+        viewModel.scanResult.observe(this) { result ->
+            result ?: return@observe  // null = sudah dikonsumsi
+            if (supportFragmentManager.findFragmentByTag(ScanResultBottomSheet.TAG) == null) {
+                ScanResultBottomSheet.new(result.text, result.format, result.isUrl)
+                    .show(supportFragmentManager, ScanResultBottomSheet.TAG)
             }
-            viewModel.onScanActionConsumed()
+            viewModel.onScanResultConsumed()
         }
 
         viewModel.galleryDecodeError.observe(this) { error ->
@@ -158,7 +148,6 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler {
 
     // Activity terima hasil scan → kirim ke ViewModel untuk diproses
     override fun handleResult(rawResult: Result) {
-        Toast.makeText(this, rawResult.toString(), Toast.LENGTH_LONG).show()
         viewModel.handleScanResult(
             text = rawResult.text ?: rawResult.toString(),
             format = rawResult.barcodeFormat?.name ?: "UNKNOWN"
@@ -166,6 +155,12 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler {
 
         @Suppress("DEPRECATION")
         (getSystemService(Context.VIBRATOR_SERVICE) as Vibrator).vibrate(300)
+    }
+
+    // Bottom sheet ditutup → resume camera preview supaya bisa scan berikutnya
+    // tanpa perlu keluar-masuk screen.
+    override fun onScanResultSheetDismissed() {
+        zXingScannerView.resumeCameraPreview(this)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
