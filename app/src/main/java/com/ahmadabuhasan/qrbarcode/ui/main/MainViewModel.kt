@@ -9,6 +9,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ahmadabuhasan.qrbarcode.data.AppDatabase
 import com.ahmadabuhasan.qrbarcode.data.ScanHistoryEntity
+import com.ahmadabuhasan.qrbarcode.model.ScanContent
+import com.ahmadabuhasan.qrbarcode.model.ScanContentParser
 import com.ahmadabuhasan.qrbarcode.model.ScanResult
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.DecodeHintType
@@ -43,7 +45,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val galleryDecodeError: LiveData<GalleryDecodeError?> = _galleryDecodeError
 
     fun handleScanResult(text: String, format: String) {
-        val isUrl = text.startsWith("https://") || text.startsWith("http://")
+        val isUrl = ScanContentParser.parse(text) is ScanContent.Url
 
         viewModelScope.launch {
             dao.insert(
@@ -56,7 +58,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             )
         }
 
-        _scanResult.value = ScanResult(text = text, format = format, isUrl = isUrl)
+        _scanResult.value = ScanResult(text = text, format = format)
     }
 
     fun onScanResultConsumed() {

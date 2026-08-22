@@ -21,13 +21,43 @@
     <string name="scan_from_gallery_read_failed">Failed to read image</string>
 
     <string name="scan_result_title">Scan result</string>
-    <string name="scan_result_type_url">URL</string>
-    <string name="scan_result_type_text">Text</string>
     <string name="scan_result_copy">Copy</string>
-    <string name="scan_result_open">Open</string>
     <string name="scan_result_share">Share</string>
     <string name="scan_result_scan_again">Scan again</string>
     <string name="scan_result_copied">Copied to clipboard</string>
+    <string name="scan_result_password_copied">Password copied to clipboard</string>
+    <string name="scan_result_no_app">No app can handle this</string>
+
+    <!-- Type labels shown above the content preview -->
+    <string name="scan_type_url">URL</string>
+    <string name="scan_type_wifi">Wi‑Fi network</string>
+    <string name="scan_type_phone">Phone number</string>
+    <string name="scan_type_sms">SMS</string>
+    <string name="scan_type_email">Email</string>
+    <string name="scan_type_geo">Location</string>
+    <string name="scan_type_vcard">Contact</string>
+    <string name="scan_type_text">Text</string>
+
+    <!-- Primary action button labels -->
+    <string name="scan_action_open">Open</string>
+    <string name="scan_action_wifi_copy_password">Copy password</string>
+    <string name="scan_action_dial">Dial</string>
+    <string name="scan_action_sms">Send SMS</string>
+    <string name="scan_action_email">Compose email</string>
+    <string name="scan_action_maps">Open in Maps</string>
+    <string name="scan_action_save_contact">Save contact</string>
+
+    <!-- Wi-Fi preview lines -->
+    <string name="scan_wifi_ssid">SSID: %1$s</string>
+    <string name="scan_wifi_password">Password: %1$s</string>
+    <string name="scan_wifi_password_none">No password</string>
+    <string name="scan_wifi_security">Security: %1$s</string>
+    <string name="scan_wifi_hidden">Hidden network</string>
+
+    <!-- vCard preview lines -->
+    <string name="scan_vcard_name">Name: %1$s</string>
+    <string name="scan_vcard_phone">Phone: %1$s</string>
+    <string name="scan_vcard_email">Email: %1$s</string>
 
     <string name="history">History</string>
     <string name="history_empty">No scans yet</string>

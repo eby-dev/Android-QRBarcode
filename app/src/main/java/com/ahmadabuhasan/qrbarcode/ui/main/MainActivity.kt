@@ -111,7 +111,7 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler, ScanResultB
         viewModel.scanResult.observe(this) { result ->
             result ?: return@observe  // null = sudah dikonsumsi
             if (supportFragmentManager.findFragmentByTag(ScanResultBottomSheet.TAG) == null) {
-                ScanResultBottomSheet.new(result.text, result.format, result.isUrl)
+                ScanResultBottomSheet.new(result.text, result.format)
                     .show(supportFragmentManager, ScanResultBottomSheet.TAG)
             }
             viewModel.onScanResultConsumed()

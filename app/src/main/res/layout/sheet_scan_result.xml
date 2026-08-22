@@ -23,17 +23,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:maxLines="6"
+        android:maxLines="8"
         android:ellipsize="end"
         android:textIsSelectable="true"
         android:textColor="?android:attr/textColorPrimary"
         android:textSize="16sp"
         tools:text="https://example.com/scanned" />
 
-    <LinearLayout
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnPrimary"
+        style="@style/Widget.MaterialComponents.Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        tools:text="Open" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:orientation="horizontal">
 
         <com.google.android.material.button.MaterialButton
@@ -45,16 +53,6 @@
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
             android:text="@string/scan_result_copy" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnOpen"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="0dp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:text="@string/scan_result_open" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnShare"
@@ -73,9 +71,12 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnScanAgain"
-            style="@style/Widget.MaterialComponents.Button"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:minWidth="0dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
             android:text="@string/scan_result_scan_again" />
     </LinearLayout>
 
