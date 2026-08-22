@@ -40,6 +40,18 @@ sealed class ScanContent {
         val email: String?,
     ) : ScanContent()
 
+    // Calendar event dates are kept as raw strings — VEVENT DTSTART/DTEND are
+    // typically ISO-basic (yyyyMMdd'T'HHmmss'Z'), and the Calendar intent
+    // accepts long millis, so we parse-to-millis at intent time in the sheet.
+    data class CalendarEvent(
+        override val raw: String,
+        val title: String?,
+        val location: String?,
+        val description: String?,
+        val start: String?,
+        val end: String?,
+    ) : ScanContent()
+
     data class Text(override val raw: String) : ScanContent()
 }
 
@@ -56,6 +68,9 @@ object ScanContentParser {
         text.startsWith("MATMSG:", ignoreCase = true) -> parseMatmsg(text) ?: ScanContent.Text(text)
         text.startsWith("geo:", ignoreCase = true) -> parseGeo(text) ?: ScanContent.Text(text)
         text.startsWith("BEGIN:VCARD", ignoreCase = true) -> parseVCard(text)
+        text.startsWith("BEGIN:VEVENT", ignoreCase = true) ||
+            (text.startsWith("BEGIN:VCALENDAR", ignoreCase = true) && text.contains("BEGIN:VEVENT", ignoreCase = true)) ->
+            parseCalendarEvent(text)
         else -> ScanContent.Text(text)
     }
 
@@ -150,6 +165,24 @@ object ScanContentParser {
             runCatching { Uri.parse(raw).getQueryParameter("q") }.getOrNull()
         } else null
         return ScanContent.Geo(raw, parts[0].trim(), parts[1].trim(), query)
+    }
+
+    private fun parseCalendarEvent(raw: String): ScanContent.CalendarEvent {
+        fun field(key: String): String? = raw.lineSequence().firstNotNullOfOrNull { line ->
+            val trimmed = line.trimEnd()
+            // vEvent lines can be like "SUMMARY:foo" or "DTSTART;TZID=UTC:20260901T090000Z"
+            val marker = trimmed.substringBefore(':', "")
+            val name = marker.substringBefore(';').uppercase()
+            if (name == key) trimmed.substringAfter(':', "").takeIf { it.isNotBlank() } else null
+        }
+        return ScanContent.CalendarEvent(
+            raw = raw,
+            title = field("SUMMARY"),
+            location = field("LOCATION"),
+            description = field("DESCRIPTION"),
+            start = field("DTSTART"),
+            end = field("DTEND"),
+        )
     }
 
     private fun parseVCard(raw: String): ScanContent.VCard {

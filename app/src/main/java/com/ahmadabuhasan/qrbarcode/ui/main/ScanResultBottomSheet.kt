@@ -8,6 +8,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.provider.CalendarContract
 import android.provider.ContactsContract
 import android.view.LayoutInflater
 import android.view.View
@@ -39,8 +40,9 @@ class ScanResultBottomSheet : BottomSheetDialogFragment() {
 
         val content = ScanContentParser.parse(rawText)
 
+        val trailing = trailingHintFor(content) ?: format
         view.findViewById<TextView>(R.id.textTypeLabel).text =
-            getString(R.string.history_meta_format, getString(typeLabelFor(content)), format)
+            getString(R.string.history_meta_format, getString(typeLabelFor(content)), trailing)
         view.findViewById<TextView>(R.id.textContent).text = displayTextFor(content)
 
         val btnPrimary = view.findViewById<MaterialButton>(R.id.btnPrimary)
@@ -86,7 +88,15 @@ class ScanResultBottomSheet : BottomSheetDialogFragment() {
         is ScanContent.Email -> R.string.scan_type_email
         is ScanContent.Geo -> R.string.scan_type_geo
         is ScanContent.VCard -> R.string.scan_type_vcard
+        is ScanContent.CalendarEvent -> R.string.scan_type_event
         is ScanContent.Text -> R.string.scan_type_text
+    }
+
+    // For URLs, prefer showing the host next to the type badge (safer than
+    // the barcode format) so users can eyeball the domain before opening.
+    private fun trailingHintFor(content: ScanContent): String? = when (content) {
+        is ScanContent.Url -> runCatching { Uri.parse(content.raw).host }.getOrNull()?.takeIf { it.isNotBlank() }
+        else -> null
     }
 
     private fun displayTextFor(content: ScanContent): String = when (content) {
@@ -109,6 +119,18 @@ class ScanResultBottomSheet : BottomSheetDialogFragment() {
             content.name?.let { appendLine(getString(R.string.scan_vcard_name, it)) }
             content.phone?.let { appendLine(getString(R.string.scan_vcard_phone, it)) }
             content.email?.let { append(getString(R.string.scan_vcard_email, it)) }
+        }.ifBlank { content.raw }
+        is ScanContent.CalendarEvent -> buildString {
+            content.title?.let { appendLine(getString(R.string.scan_event_title, it)) }
+            val startMs = content.start?.let(::parseCalendarMillis)
+            val endMs = content.end?.let(::parseCalendarMillis)
+            val startStr = startMs?.let(::formatDateTime) ?: content.start
+            val endStr = endMs?.let(::formatDateTime) ?: content.end
+            when {
+                startStr != null && endStr != null -> appendLine(getString(R.string.scan_event_when_range, startStr, endStr))
+                startStr != null -> appendLine(getString(R.string.scan_event_when, startStr))
+            }
+            content.location?.let { append(getString(R.string.scan_event_location, it)) }
         }.ifBlank { content.raw }
         else -> content.raw
     }
@@ -150,6 +172,17 @@ class ScanResultBottomSheet : BottomSheetDialogFragment() {
             }
             launchAndDismiss(intent)
         }
+        is ScanContent.CalendarEvent -> PrimaryAction(R.string.scan_action_add_event) {
+            val intent = Intent(Intent.ACTION_INSERT).apply {
+                data = CalendarContract.Events.CONTENT_URI
+                content.title?.let { putExtra(CalendarContract.Events.TITLE, it) }
+                content.location?.let { putExtra(CalendarContract.Events.EVENT_LOCATION, it) }
+                content.description?.let { putExtra(CalendarContract.Events.DESCRIPTION, it) }
+                content.start?.let(::parseCalendarMillis)?.let { putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, it) }
+                content.end?.let(::parseCalendarMillis)?.let { putExtra(CalendarContract.EXTRA_EVENT_END_TIME, it) }
+            }
+            launchAndDismiss(intent)
+        }
         is ScanContent.Text -> null
     }
 
@@ -173,6 +206,35 @@ class ScanResultBottomSheet : BottomSheetDialogFragment() {
     private fun toast(@StringRes res: Int) {
         Toast.makeText(requireContext(), res, Toast.LENGTH_SHORT).show()
     }
+
+    // vEvent DTSTART/DTEND come in ISO basic form: UTC (`yyyyMMdd'T'HHmmss'Z'`),
+    // local (`yyyyMMdd'T'HHmmss`), or all-day (`yyyyMMdd`). Returns null when
+    // none match so the sheet can fall back to the raw string.
+    private fun parseCalendarMillis(value: String): Long? {
+        val trimmed = value.trim()
+        val patterns = listOf(
+            "yyyyMMdd'T'HHmmss'Z'" to java.util.TimeZone.getTimeZone("UTC"),
+            "yyyyMMdd'T'HHmmss" to java.util.TimeZone.getDefault(),
+            "yyyyMMdd" to java.util.TimeZone.getDefault(),
+        )
+        for ((pattern, tz) in patterns) {
+            try {
+                val sdf = java.text.SimpleDateFormat(pattern, java.util.Locale.US)
+                sdf.timeZone = tz
+                sdf.isLenient = false
+                return sdf.parse(trimmed)?.time
+            } catch (_: java.text.ParseException) {
+                continue
+            }
+        }
+        return null
+    }
+
+    private fun formatDateTime(millis: Long): String =
+        java.text.DateFormat.getDateTimeInstance(
+            java.text.DateFormat.MEDIUM,
+            java.text.DateFormat.SHORT,
+        ).format(java.util.Date(millis))
 
     companion object {
         const val TAG = "ScanResultBottomSheet"

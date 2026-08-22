@@ -36,6 +36,7 @@
     <string name="scan_type_email">Email</string>
     <string name="scan_type_geo">Location</string>
     <string name="scan_type_vcard">Contact</string>
+    <string name="scan_type_event">Event</string>
     <string name="scan_type_text">Text</string>
 
     <!-- Primary action button labels -->
@@ -46,6 +47,7 @@
     <string name="scan_action_email">Compose email</string>
     <string name="scan_action_maps">Open in Maps</string>
     <string name="scan_action_save_contact">Save contact</string>
+    <string name="scan_action_add_event">Add to calendar</string>
 
     <!-- Wi-Fi preview lines -->
     <string name="scan_wifi_ssid">SSID: %1$s</string>
@@ -58,6 +60,12 @@
     <string name="scan_vcard_name">Name: %1$s</string>
     <string name="scan_vcard_phone">Phone: %1$s</string>
     <string name="scan_vcard_email">Email: %1$s</string>
+
+    <!-- Calendar event preview lines -->
+    <string name="scan_event_title">Title: %1$s</string>
+    <string name="scan_event_when">When: %1$s</string>
+    <string name="scan_event_when_range">When: %1$s → %2$s</string>
+    <string name="scan_event_location">Location: %1$s</string>
 
     <string name="history">History</string>
     <string name="history_empty">No scans yet</string>
