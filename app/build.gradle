@@ -35,20 +35,32 @@ def testAdAppId = 'ca-app-pub-3940256099942544~3347511713'
 def testBannerAdId = 'ca-app-pub-3940256099942544/6300978111'
 def testInterstitialAdId = 'ca-app-pub-3940256099942544/1033173712'
 
-// Release secrets — fall back to test IDs when missing so CI keeps working
-// while the real AdMob account is suspended. Tighten this back to a hard
-// failure once the account is reinstated.
+// Release secrets are mandatory — shipping Google's test IDs to production
+// users serves no real ads and puts the publisher account at risk. Supply them
+// via local.properties or the matching env vars (CI writes them in android.yml).
 def releaseAdAppId = readSecret('admob_application_id', 'ADMOB_APPLICATION_ID')
 def releaseBannerAdId = readSecret('banner_ad_id', 'BANNER_AD_ID')
 def releaseInterstitialAdId = readSecret('interstitial_ad_id', 'INTERSTITIAL_AD_ID')
 
-def usingReleaseFallback = []
-if (!releaseAdAppId) { releaseAdAppId = testAdAppId; usingReleaseFallback << 'admob_application_id' }
-if (!releaseBannerAdId) { releaseBannerAdId = testBannerAdId; usingReleaseFallback << 'banner_ad_id' }
-if (!releaseInterstitialAdId) { releaseInterstitialAdId = testInterstitialAdId; usingReleaseFallback << 'interstitial_ad_id' }
-if (!usingReleaseFallback.isEmpty()) {
-    logger.warn("[AdMob] Using Google test IDs for release secret(s) ${usingReleaseFallback.join(', ')} — do NOT ship this to production users")
+def missingReleaseSecrets = []
+if (!releaseAdAppId) { missingReleaseSecrets << 'admob_application_id (ADMOB_APPLICATION_ID)' }
+if (!releaseBannerAdId) { missingReleaseSecrets << 'banner_ad_id (BANNER_AD_ID)' }
+if (!releaseInterstitialAdId) { missingReleaseSecrets << 'interstitial_ad_id (INTERSTITIAL_AD_ID)' }
+
+gradle.taskGraph.whenReady { taskGraph ->
+    if (missingReleaseSecrets.isEmpty()) return
+    def needsRelease = taskGraph.allTasks.any { it.name.toLowerCase().contains('release') }
+    if (needsRelease) {
+        throw new GradleException(
+                "[AdMob] Missing release secret(s): ${missingReleaseSecrets.join(', ')}. " +
+                        "Set them in local.properties or as environment variables before building release.")
+    }
 }
+
+// Placeholders so debug-only builds still configure without the release secrets.
+if (!releaseAdAppId) { releaseAdAppId = testAdAppId }
+if (!releaseBannerAdId) { releaseBannerAdId = testBannerAdId }
+if (!releaseInterstitialAdId) { releaseInterstitialAdId = testInterstitialAdId }
 
 android {
     signingConfigs {

@@ -50,11 +50,13 @@ Activity-based with lightweight MVVM per screen (Activity + ViewModel + LiveData
 **QR content parsing:** [model/ScanContent.kt](app/src/main/java/com/ahmadabuhasan/qrbarcode/model/ScanContent.kt) is a sealed class covering `Url`, `Wifi`, `Phone`, `Sms`, `Email`, `Geo`, `VCard`, `CalendarEvent`, `Text`. `ScanContentParser.parse(text)` classifies raw scan text by prefix (`WIFI:`, `tel:`, `SMSTO:`/`sms:`, `mailto:`/`MATMSG:`, `geo:`, `BEGIN:VCARD`, `BEGIN:VEVENT`/`BEGIN:VCALENDAR`, http/https) and pulls structured fields. Unrecognised payloads fall through as `Text`.
 
 **AdMob:**
-- **All ad loading is currently commented out** in MainActivity, QrGeneratorActivity, and [Utils.kt](app/src/main/java/com/ahmadabuhasan/qrbarcode/utils/Utils.kt) because the publisher account (`pub-8638037215789792`) is suspended for invalid traffic. Each `adViewContainer` is hidden via `visibility = View.GONE`; the imports and loader code are kept commented so they can be re-enabled with a single uncomment pass once the account is reinstated. Do not delete this scaffolding.
-- When re-enabled, ads land only on MainActivity and QrGeneratorActivity (banner). WA Direct, About, History have no ads — deliberately reduced ad density.
+- Ads are **live again** — publisher `pub-8638037215789792` was reinstated on 2026-08-24 after a suspension for invalid traffic. `MobileAds.initialize` runs in [MyApp.kt](app/src/main/java/com/ahmadabuhasan/qrbarcode/MyApp.kt), and banners load in MainActivity and QrGeneratorActivity.
+- **Banners sit at the BOTTOM of both screens, and must stay there.** The pre-suspension layout put the banner directly above the camera viewfinder, where hands moving to aim at a QR code generated accidental clicks — the most likely cause of the invalid-traffic strike. On MainActivity the flash controls also keep a 24dp gap above the banner. Do not move a banner back to the top.
+- Ads land only on MainActivity and QrGeneratorActivity (banner). WA Direct, About, History have no ads — deliberately reduced ad density.
 - The App ID lives in the manifest via `@string/AdMob_Application_ID`, which is a build-time `resValue` (not committed as a raw resource) — debug uses Google's test App ID, release reads it from `local.properties` / env var (see [Ad ID sourcing](#ad-id-sourcing) below).
 - Banner ad unit IDs come from **native code**. Layouts hold a plain `<FrameLayout>` container, and each activity constructs the `AdView` in code and calls `adView.adUnitId = AppConfig.bannerAdId()` before `loadAd`. The AdMob SDK rejects setting `adUnitId` twice or leaving it out of XML on an inflated `AdView`, so the container pattern is required.
-- The interstitial has never been wired to a trigger: [Utils.kt](app/src/main/java/com/ahmadabuhasan/qrbarcode/utils/Utils.kt) exposes `loadAd()` and reads `AppConfig.interstitialAdId()`, but no screen calls it. The infrastructure is kept so it can be attached to a smarter trigger later (e.g. after N scans).
+- The interstitial is **intentionally still unwired**: [Utils.kt](app/src/main/java/com/ahmadabuhasan/qrbarcode/utils/Utils.kt) exposes `loadAd()` and reads `AppConfig.interstitialAdId()`, but no screen calls it. Interstitials carry the highest invalid-traffic risk, so attach it only behind a frequency cap (e.g. every N scans with a minimum time gap) — never on every screen entry.
+- **No GDPR/UMP consent flow exists yet.** Add the User Messaging Platform SDK before serving ads to EEA/UK users.
 
 ## Ad ID sourcing
 
@@ -65,7 +67,7 @@ Ad unit IDs (banner, interstitial) are compiled into `libnative-lib.so` as prepr
 - [AppConfig.kt](app/src/main/java/com/ahmadabuhasan/qrbarcode/utils/AppConfig.kt) loads the library and declares the two `external` functions
 - `app/build.gradle` reads `banner_ad_id`, `interstitial_ad_id`, `admob_application_id` from `local.properties` or env vars (`BANNER_AD_ID`, `INTERSTITIAL_AD_ID`, `ADMOB_APPLICATION_ID`), passes them into `cppFlags` per build type, and also uses `admob_application_id` as a `resValue` for the manifest App ID.
 - Debug always uses Google's public test IDs.
-- Release falls back to test IDs (with a Gradle warning) when a secret is missing. This is a temporary allowance while the AdMob account is suspended; tighten it back to a hard failure once the account is reinstated.
+- Release **fails the build** when any of the three secrets is missing (enforced in a `gradle.taskGraph.whenReady` hook so debug-only builds still configure without them). Shipping Google test IDs to production serves no real ads and endangers the publisher account.
 - CI writes the three release secrets into `local.properties` in the "Build AAB" job in [android.yml](.github/workflows/android.yml).
 
 ## Theming

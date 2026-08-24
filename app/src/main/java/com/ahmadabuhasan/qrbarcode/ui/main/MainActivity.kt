@@ -23,10 +23,10 @@ import com.ahmadabuhasan.qrbarcode.ui.history.HistoryActivity
 import com.ahmadabuhasan.qrbarcode.ui.qrgenerator.QrGeneratorActivity
 import com.ahmadabuhasan.qrbarcode.ui.wadirect.WaDirectActivity
 import com.ahmadabuhasan.qrbarcode.utils.BaseActivity
-// import com.ahmadabuhasan.qrbarcode.utils.AppConfig
-// import com.google.android.gms.ads.AdRequest
-// import com.google.android.gms.ads.AdSize
-// import com.google.android.gms.ads.AdView
+import com.ahmadabuhasan.qrbarcode.utils.AppConfig
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.appupdate.AppUpdateManager
@@ -84,14 +84,12 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler, ScanResultB
             }
         }
 
-        // Banner disabled while AdMob publisher pub-8638037215789792 is suspended.
-        binding.adViewContainer?.visibility = View.GONE
-        // val adView = AdView(this).apply {
-        //     adUnitId = AppConfig.bannerAdId()
-        //     setAdSize(AdSize.BANNER)
-        // }
-        // binding.adViewContainer?.addView(adView)
-        // adView.loadAd(AdRequest.Builder().build())
+        val adView = AdView(this).apply {
+            adUnitId = AppConfig.bannerAdId()
+            setAdSize(AdSize.BANNER)
+        }
+        binding.adViewContainer?.addView(adView)
+        adView.loadAd(AdRequest.Builder().build())
 
         zXingScannerView = ZXingScannerView(this)
         binding.contentFrame?.addView(zXingScannerView)
