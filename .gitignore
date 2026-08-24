@@ -30,3 +30,5 @@ private_key.pepk
 # Firebase service account keys (never commit — GitHub Secret is the source of truth)
 *firebase-adminsdk*.json
 firebase-sa.json
+# Local working notes (kept out of the repo)
+/docs/
