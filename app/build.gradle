@@ -35,20 +35,36 @@ def testAdAppId = 'ca-app-pub-3940256099942544~3347511713'
 def testBannerAdId = 'ca-app-pub-3940256099942544/6300978111'
 def testInterstitialAdId = 'ca-app-pub-3940256099942544/1033173712'
 
-// Release secrets — fall back to test IDs when missing so CI keeps working
-// while the real AdMob account is suspended. Tighten this back to a hard
-// failure once the account is reinstated.
-def releaseAdAppId = readSecret('admob_application_id', 'ADMOB_APPLICATION_ID')
-def releaseBannerAdId = readSecret('banner_ad_id', 'BANNER_AD_ID')
-def releaseInterstitialAdId = readSecret('interstitial_ad_id', 'INTERSTITIAL_AD_ID')
+// Release secrets are mandatory — shipping Google's test IDs to production
+// users serves no real ads and puts the publisher account at risk. Supply them
+// via local.properties or the matching env vars (CI writes them in android.yml).
+def releaseAdAppId = readSecret('admob_app_id', 'ADMOB_APP_ID')
+def releaseBannerAdId = readSecret('admob_banner_id', 'ADMOB_BANNER_ID')
+def releaseInterstitialAdId = readSecret('admob_interstitial_id', 'ADMOB_INTERSTITIAL_ID')
 
-def usingReleaseFallback = []
-if (!releaseAdAppId) { releaseAdAppId = testAdAppId; usingReleaseFallback << 'admob_application_id' }
-if (!releaseBannerAdId) { releaseBannerAdId = testBannerAdId; usingReleaseFallback << 'banner_ad_id' }
-if (!releaseInterstitialAdId) { releaseInterstitialAdId = testInterstitialAdId; usingReleaseFallback << 'interstitial_ad_id' }
-if (!usingReleaseFallback.isEmpty()) {
-    logger.warn("[AdMob] Using Google test IDs for release secret(s) ${usingReleaseFallback.join(', ')} — do NOT ship this to production users")
+def missingReleaseSecrets = []
+if (!releaseAdAppId) { missingReleaseSecrets << 'admob_app_id (ADMOB_APP_ID)' }
+if (!releaseBannerAdId) { missingReleaseSecrets << 'admob_banner_id (ADMOB_BANNER_ID)' }
+if (!releaseInterstitialAdId) { missingReleaseSecrets << 'admob_interstitial_id (ADMOB_INTERSTITIAL_ID)' }
+
+gradle.taskGraph.whenReady { taskGraph ->
+    if (missingReleaseSecrets.isEmpty()) return
+    def needsRelease = taskGraph.allTasks.any { it.name.toLowerCase().contains('release') }
+    if (needsRelease) {
+        throw new GradleException(
+                "[AdMob] Missing release secret(s): ${missingReleaseSecrets.join(', ')}. " +
+                        "Set them in local.properties or as environment variables before building release.")
+    }
 }
+
+// Optional: hashed device id for exercising the UMP consent form on a debug
+// build (forces EEA geography). Empty when unset, which disables the override.
+def consentTestDeviceId = readSecret('admob_test_device_id', 'ADMOB_TEST_DEVICE_ID') ?: ''
+
+// Placeholders so debug-only builds still configure without the release secrets.
+if (!releaseAdAppId) { releaseAdAppId = testAdAppId }
+if (!releaseBannerAdId) { releaseBannerAdId = testBannerAdId }
+if (!releaseInterstitialAdId) { releaseInterstitialAdId = testInterstitialAdId }
 
 android {
     signingConfigs {
@@ -90,11 +106,12 @@ android {
             signingConfig signingConfigs.release
 
             resValue "string", "AdMob_Application_ID", releaseAdAppId
+            buildConfigField "String", "CONSENT_TEST_DEVICE_ID", "\"\""
 
             externalNativeBuild {
                 cmake {
-                    cppFlags "-Dbanner_ad_id=${releaseBannerAdId}",
-                            "-Dinterstitial_ad_id=${releaseInterstitialAdId}"
+                    cppFlags "-Dadmob_banner_id=${releaseBannerAdId}",
+                            "-Dadmob_interstitial_id=${releaseInterstitialAdId}"
                 }
             }
         }
@@ -102,11 +119,12 @@ android {
             debuggable true
 
             resValue "string", "AdMob_Application_ID", testAdAppId
+            buildConfigField "String", "CONSENT_TEST_DEVICE_ID", "\"${consentTestDeviceId}\""
 
             externalNativeBuild {
                 cmake {
-                    cppFlags "-Dbanner_ad_id=${testBannerAdId}",
-                            "-Dinterstitial_ad_id=${testInterstitialAdId}"
+                    cppFlags "-Dadmob_banner_id=${testBannerAdId}",
+                            "-Dadmob_interstitial_id=${testInterstitialAdId}"
                 }
             }
         }
