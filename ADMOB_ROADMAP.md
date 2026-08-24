@@ -35,6 +35,28 @@ account.
   published for this app, European users get the default test form rather
   than your own.
 
+## Action required: the Android CI workflow is DISABLED
+
+Merging the AdMob work to `master` would have triggered `deploy-release`, which
+uploads straight to **Play Store production** with no manual approval — while
+`versionCode` was still 13 (unchanged since v1.0.12). Rather than race to cancel
+the run, the whole workflow was disabled before merging:
+
+```
+gh workflow disable 28566988      # "Android CI"
+```
+
+**Nothing builds, tests, or deploys until it is re-enabled:**
+
+```
+gh workflow enable 28566988
+```
+
+Before turning it back on, bump `versionCode` (13 -> 14) and `versionName`
+(1.0.12 -> 1.0.13) in `app/build.gradle`, or the Play Store upload will be
+rejected as a duplicate version. The "Sync version to gh-pages" workflow was
+left running — it only copies the version string into the landing page.
+
 ## Action required: rename the GitHub secrets
 
 The Gradle/CI keys were renamed so every AdMob key shares one prefix:
