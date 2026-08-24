@@ -57,6 +57,10 @@ gradle.taskGraph.whenReady { taskGraph ->
     }
 }
 
+// Optional: hashed device id for exercising the UMP consent form on a debug
+// build (forces EEA geography). Empty when unset, which disables the override.
+def consentTestDeviceId = readSecret('admob_test_device_id', 'ADMOB_TEST_DEVICE_ID') ?: ''
+
 // Placeholders so debug-only builds still configure without the release secrets.
 if (!releaseAdAppId) { releaseAdAppId = testAdAppId }
 if (!releaseBannerAdId) { releaseBannerAdId = testBannerAdId }
@@ -102,6 +106,7 @@ android {
             signingConfig signingConfigs.release
 
             resValue "string", "AdMob_Application_ID", releaseAdAppId
+            buildConfigField "String", "CONSENT_TEST_DEVICE_ID", "\"\""
 
             externalNativeBuild {
                 cmake {
@@ -114,6 +119,7 @@ android {
             debuggable true
 
             resValue "string", "AdMob_Application_ID", testAdAppId
+            buildConfigField "String", "CONSENT_TEST_DEVICE_ID", "\"${consentTestDeviceId}\""
 
             externalNativeBuild {
                 cmake {
