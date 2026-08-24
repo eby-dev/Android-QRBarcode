@@ -38,14 +38,14 @@ def testInterstitialAdId = 'ca-app-pub-3940256099942544/1033173712'
 // Release secrets are mandatory — shipping Google's test IDs to production
 // users serves no real ads and puts the publisher account at risk. Supply them
 // via local.properties or the matching env vars (CI writes them in android.yml).
-def releaseAdAppId = readSecret('admob_application_id', 'ADMOB_APPLICATION_ID')
-def releaseBannerAdId = readSecret('banner_ad_id', 'BANNER_AD_ID')
-def releaseInterstitialAdId = readSecret('interstitial_ad_id', 'INTERSTITIAL_AD_ID')
+def releaseAdAppId = readSecret('admob_app_id', 'ADMOB_APP_ID')
+def releaseBannerAdId = readSecret('admob_banner_id', 'ADMOB_BANNER_ID')
+def releaseInterstitialAdId = readSecret('admob_interstitial_id', 'ADMOB_INTERSTITIAL_ID')
 
 def missingReleaseSecrets = []
-if (!releaseAdAppId) { missingReleaseSecrets << 'admob_application_id (ADMOB_APPLICATION_ID)' }
-if (!releaseBannerAdId) { missingReleaseSecrets << 'banner_ad_id (BANNER_AD_ID)' }
-if (!releaseInterstitialAdId) { missingReleaseSecrets << 'interstitial_ad_id (INTERSTITIAL_AD_ID)' }
+if (!releaseAdAppId) { missingReleaseSecrets << 'admob_app_id (ADMOB_APP_ID)' }
+if (!releaseBannerAdId) { missingReleaseSecrets << 'admob_banner_id (ADMOB_BANNER_ID)' }
+if (!releaseInterstitialAdId) { missingReleaseSecrets << 'admob_interstitial_id (ADMOB_INTERSTITIAL_ID)' }
 
 gradle.taskGraph.whenReady { taskGraph ->
     if (missingReleaseSecrets.isEmpty()) return
@@ -110,8 +110,8 @@ android {
 
             externalNativeBuild {
                 cmake {
-                    cppFlags "-Dbanner_ad_id=${releaseBannerAdId}",
-                            "-Dinterstitial_ad_id=${releaseInterstitialAdId}"
+                    cppFlags "-Dadmob_banner_id=${releaseBannerAdId}",
+                            "-Dadmob_interstitial_id=${releaseInterstitialAdId}"
                 }
             }
         }
@@ -123,8 +123,8 @@ android {
 
             externalNativeBuild {
                 cmake {
-                    cppFlags "-Dbanner_ad_id=${testBannerAdId}",
-                            "-Dinterstitial_ad_id=${testInterstitialAdId}"
+                    cppFlags "-Dadmob_banner_id=${testBannerAdId}",
+                            "-Dadmob_interstitial_id=${testInterstitialAdId}"
                 }
             }
         }

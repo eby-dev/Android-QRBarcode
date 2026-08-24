@@ -40,8 +40,13 @@ object ConsentManager {
      * Resolves consent, then initialises the Ads SDK.
      *
      * @param onReady invoked on the main thread once ads may be requested.
-     *   Never called if consent is refused, so callers must leave their ad
-     *   container empty until it fires.
+     *   Callers must leave their ad container empty until it fires. It can fire
+     *   more than once — cached consent first, then the background refresh — so
+     *   the callback must be idempotent.
+     *
+     * Note that refusing the form does not suppress this callback. Under the
+     * TCF framework "Do not consent" refuses *personalisation*, not ads, so
+     * `canRequestAds()` stays true and non-personalised ads still serve.
      */
     fun gatherConsent(activity: Activity, onReady: () -> Unit) {
         val info = UserMessagingPlatform.getConsentInformation(activity)

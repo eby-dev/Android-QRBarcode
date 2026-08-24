@@ -65,7 +65,7 @@ Ad unit IDs (banner, interstitial) are compiled into `libnative-lib.so` as prepr
 - [CMakeLists.txt](app/CMakeLists.txt) builds `libnative-lib` from [cpp/native-lib.cpp](app/src/main/cpp/native-lib.cpp)
 - [cpp/native-lib.cpp](app/src/main/cpp/native-lib.cpp) exposes `bannerAdId()` and `interstitialAdId()` via JNI using `TOSTRING(x)` on the macro-substituted values
 - [AppConfig.kt](app/src/main/java/com/ahmadabuhasan/qrbarcode/utils/AppConfig.kt) loads the library and declares the two `external` functions
-- `app/build.gradle` reads `banner_ad_id`, `interstitial_ad_id`, `admob_application_id` from `local.properties` or env vars (`BANNER_AD_ID`, `INTERSTITIAL_AD_ID`, `ADMOB_APPLICATION_ID`), passes them into `cppFlags` per build type, and also uses `admob_application_id` as a `resValue` for the manifest App ID.
+- `app/build.gradle` reads `admob_banner_id`, `admob_interstitial_id`, `admob_app_id` from `local.properties` or env vars (`ADMOB_BANNER_ID`, `ADMOB_INTERSTITIAL_ID`, `ADMOB_APP_ID`), passes them into `cppFlags` per build type, and also uses `admob_app_id` as a `resValue` for the manifest App ID. Every AdMob key — including the optional `admob_test_device_id` — carries the `admob_` prefix so they group together.
 - Debug always uses Google's public test IDs.
 - Release **fails the build** when any of the three secrets is missing (enforced in a `gradle.taskGraph.whenReady` hook so debug-only builds still configure without them). Shipping Google test IDs to production serves no real ads and endangers the publisher account.
 - CI writes the three release secrets into `local.properties` in the "Build AAB" job in [android.yml](.github/workflows/android.yml).

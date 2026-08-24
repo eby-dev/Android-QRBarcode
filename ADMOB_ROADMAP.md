@@ -35,6 +35,23 @@ account.
   published for this app, European users get the default test form rather
   than your own.
 
+## Action required: rename the GitHub secrets
+
+The Gradle/CI keys were renamed so every AdMob key shares one prefix:
+
+| Old | New |
+|---|---|
+| `ADMOB_APPLICATION_ID` | `ADMOB_APP_ID` |
+| `BANNER_AD_ID` | `ADMOB_BANNER_ID` |
+| `INTERSTITIAL_AD_ID` | `ADMOB_INTERSTITIAL_ID` |
+
+GitHub secrets cannot be renamed in place, and the workflow now reads the new
+names. **Until the three secrets are re-created under their new names in
+Settings → Secrets and variables → Actions, the release build will fail** with
+the missing-secret error — which is the intended behaviour, not a regression.
+Local `local.properties` keys changed the same way (`admob_app_id`,
+`admob_banner_id`, `admob_interstitial_id`).
+
 ## Rules that must not be broken
 
 These encode why the account was suspended. Changing any of them reopens the
@@ -154,7 +171,8 @@ SharedPreferences, roughly 60 lines, plus one call site in MainActivity.
 ## Before each release
 
 - [ ] AdMob secrets present in `local.properties` or CI env (release build
-      fails without them)
+      fails without them): `admob_app_id`, `admob_banner_id`,
+      `admob_interstitial_id`
 - [ ] Tested on device with a **debug** build, not release
 - [ ] No new ad placements added to WA Direct, History or About
 - [ ] Banners still at the bottom of both ad-bearing screens
