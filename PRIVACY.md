@@ -24,6 +24,17 @@ Link to the privacy policy of third-party service providers used by the app
 
 The app saves your scan history (content, format, and timestamp of each scan) in a local database on your device. This data is not transmitted anywhere and never leaves your device. You can delete individual entries or clear the entire history at any time from the History screen.
 
+**Advertising Consent (EEA, UK, and Switzerland)**
+
+If you are located in the European Economic Area, the United Kingdom, or Switzerland, the app asks for your consent before any personal data is used for personalised advertising. This request is presented through Google's User Messaging Platform the first time you open the app.
+
+- Choosing **Consent** allows advertising to be personalised using your data.
+- Choosing **Do not consent** means you will still see advertisements, but they will not be based on your personal data.
+
+Either answer is remembered, so the request is not shown again. To change your choice, clear the app's data on your device (Settings → Apps → QRBarcode → Storage → Clear data); the request will appear again the next time you open the app.
+
+Advertising data is collected and processed by Google, not by me. See the [AdMob](https://support.google.com/admob/answer/6128543?hl=en) and [Google Privacy Policy](https://policies.google.com/privacy) links above for details of what Google collects and how it is used.
+
 **Log Data**
 
 I want to inform you that whenever you use my Service, in a case of an error in the app I collect data and information (through third-party products) on your phone called Log Data. This Log Data may include information such as your device Internet Protocol (“IP”) address, device name, operating system version, the configuration of the app when utilizing my Service, the time and date of your use of the Service, and other statistics.
