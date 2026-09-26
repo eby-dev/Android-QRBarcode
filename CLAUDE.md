@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ./gradlew bundleRelease        # AAB for Play Store
 
 # Test & Lint
-./gradlew test                 # Unit tests
+./gradlew test                 # Unit tests (Robolectric; see ScanContentParserTest)
 ./gradlew connectedAndroidTest # Instrumented tests
 ./gradlew lint
 
@@ -34,7 +34,7 @@ Activity-based with lightweight MVVM per screen (Activity + ViewModel + LiveData
 - [BaseActivity.kt](app/src/main/java/com/ahmadabuhasan/qrbarcode/utils/BaseActivity.kt) — All activities extend this; applies system-bar insets on Android 15+ (target SDK 35 enforces edge-to-edge). The listener is attached directly to `android.R.id.content` and `requestApplyInsets` is called so the initial dispatch is guaranteed.
 
 **Screens (all under `ui/`):**
-- [MainActivity.kt](app/src/main/java/com/ahmadabuhasan/qrbarcode/ui/main/MainActivity.kt) — QR/barcode scanner UI using ZXing (`me.dm7.barcodescanner:zxing`). Options menu offers Scan from Gallery (Android Photo Picker, decoded via `MultiFormatReader` in the ViewModel, no runtime permission), History, WA Direct, QR Generator, About. Persists every scan to Room and shows a [ScanResultBottomSheet](app/src/main/java/com/ahmadabuhasan/qrbarcode/ui/main/ScanResultBottomSheet.kt) for the result.
+- [MainActivity.kt](app/src/main/java/com/ahmadabuhasan/qrbarcode/ui/main/MainActivity.kt) — QR/barcode scanner UI: a CameraX `LifecycleCameraController` bound to a `PreviewView`, with an `MlKitAnalyzer` running ML Kit barcode scanning on every frame. The controller provides tap-to-focus and pinch-to-zoom; the flash button toggles the torch and hides on devices without a flash unit. [ViewfinderView](app/src/main/java/com/ahmadabuhasan/qrbarcode/ui/main/ViewfinderView.kt) is a purely visual overlay (ML Kit scans the whole frame). Options menu offers Scan from Gallery (Android Photo Picker, decoded with ML Kit via `InputImage.fromFilePath` in the ViewModel, no runtime permission), History, WA Direct, QR Generator, About. Persists every scan to Room and shows a [ScanResultBottomSheet](app/src/main/java/com/ahmadabuhasan/qrbarcode/ui/main/ScanResultBottomSheet.kt) for the result.
 - [QrGeneratorActivity.kt](app/src/main/java/com/ahmadabuhasan/qrbarcode/ui/qrgenerator/QrGeneratorActivity.kt) — Generates a QR bitmap from text and shares it via FileProvider.
 - [WaDirectActivity.kt](app/src/main/java/com/ahmadabuhasan/qrbarcode/ui/wadirect/WaDirectActivity.kt) — Opens `https://wa.me/<number>` with an optional message. Uses `com.hbb20:ccp` for the country code picker.
 - [HistoryActivity.kt](app/src/main/java/com/ahmadabuhasan/qrbarcode/ui/history/HistoryActivity.kt) — Lists persisted scans (RecyclerView + `ListAdapter` + `DiffUtil`) with per-item Copy / Share / Open (URLs only) / Delete and a global Clear all.
@@ -45,7 +45,7 @@ Activity-based with lightweight MVVM per screen (Activity + ViewModel + LiveData
 - [ScanHistoryEntity.kt](app/src/main/java/com/ahmadabuhasan/qrbarcode/data/ScanHistoryEntity.kt) — `id`, `content`, `format`, `isUrl`, `scannedAt`
 - [ScanHistoryDao.kt](app/src/main/java/com/ahmadabuhasan/qrbarcode/data/ScanHistoryDao.kt) — `observeAll(): LiveData<List<...>>`, `insert`, `deleteById`, `clear`
 
-**Scan result behavior:** `MainActivity` implements `ZXingScannerView.ResultHandler`. On a successful scan (from either the live camera or a picked image), `MainViewModel.handleScanResult` inserts a `ScanHistoryEntity` and emits a `ScanResult` that the activity shows in a `ScanResultBottomSheet`. The sheet parses the payload via `ScanContentParser` and renders a **type-specific primary action** (Open / Copy password / Dial / Send SMS / Compose email / Open in Maps / Save contact / Add to calendar) plus Copy, Share, and Scan again. Dismissing the sheet calls `ZXingScannerView.resumeCameraPreview` so the next scan needs no navigation.
+**Scan result behavior:** On a successful scan (from either the live camera or a picked image), `MainViewModel.handleScanResult` inserts a `ScanHistoryEntity` and emits a `ScanResult` that the activity shows in a `ScanResultBottomSheet`. The sheet parses the payload via `ScanContentParser` and renders a **type-specific primary action** (Open / Copy password / Dial / Send SMS / Compose email / Open in Maps / Save contact / Add to calendar) plus Copy, Share, and Scan again. `handleScanResult` also sets `MainViewModel.isScanningPaused`, so the analyzer ignores frames while the sheet is open (kept in the ViewModel to survive rotation). Dismissing the sheet calls `resumeScanning()` so the next scan needs no navigation. Formats are stored under ZXing's `BarcodeFormat` names via `Barcode.formatName()` in [BarcodeFormats.kt](app/src/main/java/com/ahmadabuhasan/qrbarcode/ui/main/BarcodeFormats.kt), so history rows from before and after the ML Kit switch match.
 
 **QR content parsing:** [model/ScanContent.kt](app/src/main/java/com/ahmadabuhasan/qrbarcode/model/ScanContent.kt) is a sealed class covering `Url`, `Wifi`, `Phone`, `Sms`, `Email`, `Geo`, `VCard`, `CalendarEvent`, `Text`. `ScanContentParser.parse(text)` classifies raw scan text by prefix (`WIFI:`, `tel:`, `SMSTO:`/`sms:`, `mailto:`/`MATMSG:`, `geo:`, `BEGIN:VCARD`, `BEGIN:VEVENT`/`BEGIN:VCALENDAR`, http/https) and pulls structured fields. Unrecognised payloads fall through as `Text`.
 
@@ -80,7 +80,10 @@ Ad unit IDs (banner, interstitial) are compiled into `libnative-lib.so` as prepr
 
 | Library | Purpose |
 |---|---|
-| `me.dm7.barcodescanner:zxing:1.9.8` | QR/barcode scanning |
+| `androidx.camera:camera-{camera2,lifecycle,view,mlkit-vision}:1.5.3` | Camera preview + analyzer for live scanning. Held at 1.5.x because 1.6.x needs AGP 8.9.1+ (project is on 8.7.3) |
+| `com.google.mlkit:barcode-scanning:17.3.0` | Barcode decoding, live and from gallery. Bundled model, so the first scan works offline |
+| `com.google.zxing:core:3.5.4` | QR **generation** only (ML Kit can't encode). Declared directly; it used to arrive transitively via the old dm7 scanner |
+| `org.robolectric:robolectric:4.17` | Unit tests for code that touches Android classes (e.g. `ScanContentParser` uses `android.net.Uri`) |
 | `com.google.android.gms:play-services-ads:24.5.0` | AdMob monetization |
 | `com.google.firebase:firebase-bom:34.0.0` | Firebase (Analytics) |
 | `com.google.android.play:app-update:2.1.0` | In-app update prompts |
