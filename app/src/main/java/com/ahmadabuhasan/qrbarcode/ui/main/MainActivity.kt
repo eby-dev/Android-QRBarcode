@@ -15,6 +15,9 @@ import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.mlkit.vision.MlKitAnalyzer
+import androidx.camera.view.LifecycleCameraController
 import androidx.core.content.ContextCompat
 import com.ahmadabuhasan.qrbarcode.R
 import com.ahmadabuhasan.qrbarcode.databinding.ActivityMainBinding
@@ -36,10 +39,11 @@ import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
-import com.google.zxing.Result
-import me.dm7.barcodescanner.zxing.ZXingScannerView
+import com.google.mlkit.vision.barcode.BarcodeScanner
+import com.google.mlkit.vision.barcode.BarcodeScanning
+import com.google.mlkit.vision.barcode.common.Barcode
 
-class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler, ScanResultBottomSheet.Listener {
+class MainActivity : BaseActivity(), ScanResultBottomSheet.Listener {
 
     companion object {
         private const val PERMISSION_CODE = 100
@@ -50,7 +54,8 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler, ScanResultB
     // ViewModel — semua state & logic bisnis ada di sini
     private val viewModel: MainViewModel by viewModels()
 
-    private lateinit var zXingScannerView: ZXingScannerView
+    private lateinit var cameraController: LifecycleCameraController
+    private var barcodeScanner: BarcodeScanner? = null
     private lateinit var appUpdateManager: AppUpdateManager
     private lateinit var installStateUpdatedListener: InstallStateUpdatedListener
 
@@ -67,7 +72,10 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler, ScanResultB
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+        cameraController = LifecycleCameraController(this)
+        if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            startCamera()
+        } else {
             requestPermissions(arrayOf(Manifest.permission.CAMERA), PERMISSION_CODE)
         }
 
@@ -88,11 +96,45 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler, ScanResultB
         // GDPR: the banner is only built once consent has been resolved.
         ConsentManager.gatherConsent(this) { showBanner() }
 
-        zXingScannerView = ZXingScannerView(this)
-        binding.contentFrame?.addView(zXingScannerView)
-
         setupFlashButtons()
         observeViewModel()
+    }
+
+    // Bind the camera to the activity lifecycle: CameraX starts and stops it with
+    // onStart/onStop, so there is no manual start/stop in onResume/onDestroy.
+    private fun startCamera() {
+        if (barcodeScanner != null) return
+        val scanner = BarcodeScanning.getClient()
+        barcodeScanner = scanner
+        val mainExecutor = ContextCompat.getMainExecutor(this)
+
+        cameraController.setImageAnalysisAnalyzer(
+            mainExecutor,
+            MlKitAnalyzer(listOf(scanner), ImageAnalysis.COORDINATE_SYSTEM_ORIGINAL, mainExecutor) { result ->
+                val barcode = result.getValue(scanner)?.firstOrNull { it.rawValue != null }
+                if (barcode != null) onBarcodeDetected(barcode)
+            }
+        )
+        cameraController.bindToLifecycle(this)
+        binding.previewView.controller = cameraController
+
+        cameraController.initializationFuture.addListener({
+            // Torch can only be set once the camera is open, so apply the saved state now.
+            if (cameraController.cameraInfo?.hasFlashUnit() == true) {
+                cameraController.enableTorch(viewModel.flashEnabled.value == true)
+            } else {
+                binding.flashOn?.visibility = View.GONE
+                binding.flashOff?.visibility = View.GONE
+            }
+        }, mainExecutor)
+    }
+
+    private fun onBarcodeDetected(barcode: Barcode) {
+        if (viewModel.isScanningPaused) return
+        viewModel.handleScanResult(text = barcode.rawValue!!, format = barcode.formatName())
+
+        @Suppress("DEPRECATION")
+        (getSystemService(Context.VIBRATOR_SERVICE) as Vibrator).vibrate(300)
     }
 
     // Dipanggil ConsentManager setelah consent selesai. Guard isEmpty mencegah
@@ -111,7 +153,7 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler, ScanResultB
     // Observe perubahan dari ViewModel dan update UI
     private fun observeViewModel() {
         viewModel.flashEnabled.observe(this) { enabled ->
-            zXingScannerView.setFlash(enabled)
+            cameraController.enableTorch(enabled)
             binding.flashOn?.visibility = if (enabled) View.GONE else View.VISIBLE
             binding.flashOff?.visibility = if (enabled) View.VISIBLE else View.GONE
         }
@@ -142,39 +184,22 @@ class MainActivity : BaseActivity(), ZXingScannerView.ResultHandler, ScanResultB
         binding.flashOff?.setOnClickListener { viewModel.toggleFlash() }
     }
 
-    override fun onResume() {
-        super.onResume()
-        zXingScannerView.setResultHandler(this)
-        zXingScannerView.setAspectTolerance(0.2f)
-        zXingScannerView.startCamera()
-    }
-
     override fun onDestroy() {
         super.onDestroy()
-        zXingScannerView.stopCamera()
+        barcodeScanner?.close()
     }
 
-    // Activity terima hasil scan → kirim ke ViewModel untuk diproses
-    override fun handleResult(rawResult: Result) {
-        viewModel.handleScanResult(
-            text = rawResult.text ?: rawResult.toString(),
-            format = rawResult.barcodeFormat?.name ?: "UNKNOWN"
-        )
-
-        @Suppress("DEPRECATION")
-        (getSystemService(Context.VIBRATOR_SERVICE) as Vibrator).vibrate(300)
-    }
-
-    // Bottom sheet ditutup → resume camera preview supaya bisa scan berikutnya
+    // Bottom sheet ditutup → lanjut scan supaya bisa scan berikutnya
     // tanpa perlu keluar-masuk screen.
     override fun onScanResultSheetDismissed() {
-        zXingScannerView.resumeCameraPreview(this)
+        viewModel.resumeScanning()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == PERMISSION_CODE && grantResults.isNotEmpty()) {
             val message = if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                startCamera()
                 "Camera permission granted"
             } else {
                 "Camera permission denied"
