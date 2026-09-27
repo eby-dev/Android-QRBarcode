@@ -14,6 +14,30 @@
     <string name="qr_generator_generate">Generate</string>
     <string name="qr_generator_share">Share QR</string>
     <string name="qr_generator_empty">Please enter text or URL</string>
+    <string name="scan">Scan</string>
+    <string name="home_scan_title">Scan QR / Barcode</string>
+    <string name="home_scan_subtitle">Point your camera at a code</string>
+    <string name="home_recent_scans">Recent scans</string>
+    <string name="home_see_all">See all</string>
+    <string name="open_camera_on_launch">Open camera on launch</string>
+    <string name="batch_scan">Batch scan</string>
+    <string name="batch_scan_subtitle">Scan many codes in a row, export as CSV</string>
+    <string name="batch_empty">Point the camera at codes. Each one is added here.</string>
+    <string name="batch_count">×%1$d</string>
+    <string name="batch_export_csv">Export CSV</string>
+    <string name="batch_share_text">Share as text</string>
+    <string name="batch_discard">Discard</string>
+    <string name="batch_confirm_clear">Remove all scanned codes?</string>
+    <plurals name="batch_items">
+        <item quantity="one">%1$d code</item>
+        <item quantity="other">%1$d codes</item>
+    </plurals>
+    <plurals name="batch_confirm_discard">
+        <item quantity="one">Discard %1$d scanned code?</item>
+        <item quantity="other">Discard %1$d scanned codes?</item>
+    </plurals>
+    <string name="camera_permission_denied">Camera permission is needed to scan</string>
+    <string name="camera_permission_settings">Settings</string>
     <string name="flashOn">Flash On</string>
     <string name="flashOff">Flash Off</string>
     <string name="scan_from_gallery">Scan from Gallery</string>

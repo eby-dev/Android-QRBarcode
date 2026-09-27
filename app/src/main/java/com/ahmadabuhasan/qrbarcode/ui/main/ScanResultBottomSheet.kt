@@ -42,7 +42,7 @@ class ScanResultBottomSheet : BottomSheetDialogFragment() {
 
         val trailing = trailingHintFor(content) ?: format
         view.findViewById<TextView>(R.id.textTypeLabel).text =
-            getString(R.string.history_meta_format, getString(typeLabelFor(content)), trailing)
+            getString(R.string.history_meta_format, getString(content.typeLabelRes()), trailing)
         view.findViewById<TextView>(R.id.textContent).text = displayTextFor(content)
 
         val btnPrimary = view.findViewById<MaterialButton>(R.id.btnPrimary)
@@ -78,19 +78,6 @@ class ScanResultBottomSheet : BottomSheetDialogFragment() {
     }
 
     // --- Rendering helpers ---
-
-    @StringRes
-    private fun typeLabelFor(content: ScanContent): Int = when (content) {
-        is ScanContent.Url -> R.string.scan_type_url
-        is ScanContent.Wifi -> R.string.scan_type_wifi
-        is ScanContent.Phone -> R.string.scan_type_phone
-        is ScanContent.Sms -> R.string.scan_type_sms
-        is ScanContent.Email -> R.string.scan_type_email
-        is ScanContent.Geo -> R.string.scan_type_geo
-        is ScanContent.VCard -> R.string.scan_type_vcard
-        is ScanContent.CalendarEvent -> R.string.scan_type_event
-        is ScanContent.Text -> R.string.scan_type_text
-    }
 
     // For URLs, prefer showing the host next to the type badge (safer than
     // the barcode format) so users can eyeball the domain before opening.

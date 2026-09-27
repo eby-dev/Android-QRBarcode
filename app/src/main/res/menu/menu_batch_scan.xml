@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_export_csv"
+        android:icon="@drawable/ic_share"
+        android:title="@string/batch_export_csv"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_share_text"
+        android:title="@string/batch_share_text"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_clear"
+        android:title="@string/history_clear_all"
+        app:showAsAction="never" />
+
+</menu>

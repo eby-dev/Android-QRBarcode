@@ -1,30 +1,31 @@
 package com.ahmadabuhasan.qrbarcode.ui.main
 
 import android.app.Application
-import android.graphics.BitmapFactory
-import android.net.Uri
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
-import com.ahmadabuhasan.qrbarcode.data.AppDatabase
-import com.ahmadabuhasan.qrbarcode.data.ScanHistoryEntity
-import com.ahmadabuhasan.qrbarcode.model.ScanContent
-import com.ahmadabuhasan.qrbarcode.model.ScanContentParser
-import com.ahmadabuhasan.qrbarcode.model.ScanResult
-import com.google.zxing.BinaryBitmap
-import com.google.zxing.DecodeHintType
-import com.google.zxing.MultiFormatReader
-import com.google.zxing.NotFoundException
-import com.google.zxing.RGBLuminanceSource
-import com.google.zxing.common.HybridBinarizer
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
-class MainViewModel(application: Application) : AndroidViewModel(application) {
+class MainViewModel(application: Application) : ScanViewModel(application) {
 
-    private val dao = AppDatabase.get(application).scanHistoryDao()
+    // --- Live scanning pause ---
+    // Set when a result is shown so the camera doesn't fire again behind the
+    // sheet; cleared when the sheet is dismissed. Lives here to survive rotation.
+    var isScanningPaused = false
+        private set
+
+    // ML Kit reads a code within a frame or two, so "Scan again" while still
+    // pointing at the same code would reopen the sheet instantly. Ignore that
+    // same code for a short grace period after resuming.
+    private var lastScannedText: String? = null
+    private var resumedAt = 0L
+
+    fun resumeScanning() {
+        isScanningPaused = false
+        resumedAt = System.currentTimeMillis()
+    }
+
+    fun shouldIgnoreLiveScan(text: String): Boolean =
+        isScanningPaused ||
+            (text == lastScannedText && System.currentTimeMillis() - resumedAt < RESCAN_GRACE_MS)
 
     // --- Flash state ---
     private val _flashEnabled = MutableLiveData(false)
@@ -34,83 +35,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _flashEnabled.value = !(_flashEnabled.value ?: false)
     }
 
-    // --- Scan result ---
-    // null = sudah dikonsumsi Activity (mis. bottom sheet sudah ditampilkan)
-    private val _scanResult = MutableLiveData<ScanResult?>()
-    val scanResult: LiveData<ScanResult?> = _scanResult
-
-    // --- Gallery-decode error signals (null = consumed) ---
-    sealed class GalleryDecodeError { object NoResult : GalleryDecodeError(); object ReadFailed : GalleryDecodeError() }
-    private val _galleryDecodeError = MutableLiveData<GalleryDecodeError?>()
-    val galleryDecodeError: LiveData<GalleryDecodeError?> = _galleryDecodeError
-
-    fun handleScanResult(text: String, format: String) {
-        val isUrl = ScanContentParser.parse(text) is ScanContent.Url
-
-        viewModelScope.launch {
-            dao.upsert(
-                ScanHistoryEntity(
-                    content = text,
-                    format = format,
-                    isUrl = isUrl,
-                    scannedAt = System.currentTimeMillis()
-                )
-            )
-        }
-
-        _scanResult.value = ScanResult(text = text, format = format)
+    override fun handleScanResult(text: String, format: String) {
+        isScanningPaused = true
+        lastScannedText = text
+        super.handleScanResult(text, format)
     }
 
-    fun onScanResultConsumed() {
-        _scanResult.value = null
-    }
-
-    fun onGalleryDecodeErrorConsumed() {
-        _galleryDecodeError.value = null
-    }
-
-    fun decodeImageFromUri(uri: Uri) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val bitmap = try {
-                getApplication<Application>().contentResolver.openInputStream(uri)?.use { stream ->
-                    val opts = BitmapFactory.Options().apply { inPreferredConfig = android.graphics.Bitmap.Config.ARGB_8888 }
-                    BitmapFactory.decodeStream(stream, null, opts)
-                }
-            } catch (_: Exception) {
-                null
-            }
-
-            if (bitmap == null) {
-                _galleryDecodeError.postValue(GalleryDecodeError.ReadFailed)
-                return@launch
-            }
-
-            val width = bitmap.width
-            val height = bitmap.height
-            val pixels = IntArray(width * height)
-            bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
-            bitmap.recycle()
-
-            val source = RGBLuminanceSource(width, height, pixels)
-            val binaryBitmap = BinaryBitmap(HybridBinarizer(source))
-            val reader = MultiFormatReader().apply {
-                setHints(mapOf(DecodeHintType.TRY_HARDER to true))
-            }
-            val result = try {
-                reader.decodeWithState(binaryBitmap)
-            } catch (_: NotFoundException) {
-                null
-            } catch (_: Exception) {
-                null
-            }
-
-            if (result == null) {
-                _galleryDecodeError.postValue(GalleryDecodeError.NoResult)
-            } else {
-                val text = result.text ?: result.toString()
-                val format = result.barcodeFormat?.name ?: "UNKNOWN"
-                withContext(Dispatchers.Main) { handleScanResult(text, format) }
-            }
-        }
+    private companion object {
+        const val RESCAN_GRACE_MS = 2000L
     }
 }
