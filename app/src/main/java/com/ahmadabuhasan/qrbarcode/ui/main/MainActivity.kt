@@ -1,22 +1,15 @@
 package com.ahmadabuhasan.qrbarcode.ui.main
 
 import android.Manifest
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.camera.core.ImageAnalysis
-import androidx.camera.mlkit.vision.MlKitAnalyzer
-import androidx.camera.view.CameraController
-import androidx.camera.view.LifecycleCameraController
-import androidx.core.content.ContextCompat
 import com.ahmadabuhasan.qrbarcode.R
 import com.ahmadabuhasan.qrbarcode.databinding.ActivityMainBinding
 import com.ahmadabuhasan.qrbarcode.utils.AppConfig
@@ -26,9 +19,6 @@ import com.ahmadabuhasan.qrbarcode.utils.Haptics
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
-import com.google.android.material.snackbar.Snackbar
-import com.google.mlkit.vision.barcode.BarcodeScanner
-import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 
 // The scanner. Opened from the dashboard (HomeActivity), or straight from launch
@@ -42,8 +32,7 @@ class MainActivity : BaseActivity(), ScanResultBottomSheet.Listener {
     // ViewModel — semua state & logic bisnis ada di sini
     private val viewModel: MainViewModel by viewModels()
 
-    private lateinit var cameraController: LifecycleCameraController
-    private var barcodeScanner: BarcodeScanner? = null
+    private lateinit var camera: BarcodeCamera
 
     private lateinit var binding: ActivityMainBinding
 
@@ -63,12 +52,8 @@ class MainActivity : BaseActivity(), ScanResultBottomSheet.Listener {
             setTitle(R.string.scan)
         }
 
-        // The controller enables photo capture by default; the scanner only needs
-        // preview + analysis, so drop ImageCapture to save camera resources.
-        cameraController = LifecycleCameraController(this).apply {
-            setEnabledUseCases(CameraController.IMAGE_ANALYSIS)
-        }
-        if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+        camera = BarcodeCamera(this, binding.previewView) { barcodes -> onBarcodeDetected(barcodes.first()) }
+        if (hasCameraPermission()) {
             startCamera()
         } else {
             requestPermissions(arrayOf(Manifest.permission.CAMERA), PERMISSION_CODE)
@@ -81,33 +66,15 @@ class MainActivity : BaseActivity(), ScanResultBottomSheet.Listener {
         observeViewModel()
     }
 
-    // Bind the camera to the activity lifecycle: CameraX starts and stops it with
-    // onStart/onStop, so there is no manual start/stop in onResume/onDestroy.
     private fun startCamera() {
-        if (barcodeScanner != null) return
-        val scanner = BarcodeScanning.getClient()
-        barcodeScanner = scanner
-        val mainExecutor = ContextCompat.getMainExecutor(this)
-
-        cameraController.setImageAnalysisAnalyzer(
-            mainExecutor,
-            MlKitAnalyzer(listOf(scanner), ImageAnalysis.COORDINATE_SYSTEM_ORIGINAL, mainExecutor) { result ->
-                val barcode = result.getValue(scanner)?.firstOrNull { it.rawValue != null }
-                if (barcode != null) onBarcodeDetected(barcode)
-            }
-        )
-        cameraController.bindToLifecycle(this)
-        binding.previewView.controller = cameraController
-
-        cameraController.initializationFuture.addListener({
-            // Torch can only be set once the camera is open, so apply the saved state now.
-            if (cameraController.cameraInfo?.hasFlashUnit() == true) {
-                cameraController.enableTorch(viewModel.flashEnabled.value == true)
+        camera.start { hasFlash ->
+            if (hasFlash) {
+                camera.enableTorch(viewModel.flashEnabled.value == true)
             } else {
                 binding.flashOn?.visibility = View.GONE
                 binding.flashOff?.visibility = View.GONE
             }
-        }, mainExecutor)
+        }
     }
 
     private fun onBarcodeDetected(barcode: Barcode) {
@@ -133,7 +100,7 @@ class MainActivity : BaseActivity(), ScanResultBottomSheet.Listener {
     // Observe perubahan dari ViewModel dan update UI
     private fun observeViewModel() {
         viewModel.flashEnabled.observe(this) { enabled ->
-            cameraController.enableTorch(enabled)
+            camera.enableTorch(enabled)
             binding.flashOn?.visibility = if (enabled) View.GONE else View.VISIBLE
             binding.flashOff?.visibility = if (enabled) View.VISIBLE else View.GONE
         }
@@ -152,14 +119,12 @@ class MainActivity : BaseActivity(), ScanResultBottomSheet.Listener {
     // Covers returning from app settings after granting the camera permission there.
     override fun onResume() {
         super.onResume()
-        if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            startCamera()
-        }
+        if (hasCameraPermission()) startCamera()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        barcodeScanner?.close()
+        camera.close()
     }
 
     // Bottom sheet ditutup → lanjut scan supaya bisa scan berikutnya
@@ -174,21 +139,9 @@ class MainActivity : BaseActivity(), ScanResultBottomSheet.Listener {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startCamera()
             } else {
-                showCameraPermissionDenied()
+                showCameraPermissionDenied(binding.root)
             }
         }
-    }
-
-    // After a denial (especially "Don't ask again") the dialog can't come back,
-    // so point the user to app settings instead of leaving a black preview.
-    private fun showCameraPermissionDenied() {
-        Snackbar.make(binding.root, R.string.camera_permission_denied, Snackbar.LENGTH_INDEFINITE)
-            .setAction(R.string.camera_permission_settings) {
-                startActivity(
-                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null))
-                )
-            }
-            .show()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

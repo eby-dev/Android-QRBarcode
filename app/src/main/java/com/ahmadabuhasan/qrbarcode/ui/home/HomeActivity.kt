@@ -24,6 +24,7 @@ import com.ahmadabuhasan.qrbarcode.databinding.ItemRecentScanBinding
 import com.ahmadabuhasan.qrbarcode.model.ScanContent
 import com.ahmadabuhasan.qrbarcode.model.ScanContentParser
 import com.ahmadabuhasan.qrbarcode.ui.about.AboutActivity
+import com.ahmadabuhasan.qrbarcode.ui.batch.BatchScanActivity
 import com.ahmadabuhasan.qrbarcode.ui.history.HistoryActivity
 import com.ahmadabuhasan.qrbarcode.ui.main.MainActivity
 import com.ahmadabuhasan.qrbarcode.ui.main.observeScanResults
@@ -124,6 +125,7 @@ class HomeActivity : BaseActivity() {
 
     private fun setupActions() {
         binding.cardScan.setOnClickListener { openScanner(animate = true) }
+        binding.cardBatch.setOnClickListener { startActivity(Intent(this, BatchScanActivity::class.java)) }
 
         bindAction(binding.actionGallery, R.drawable.ic_image, R.string.scan_from_gallery) {
             pickImageLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))

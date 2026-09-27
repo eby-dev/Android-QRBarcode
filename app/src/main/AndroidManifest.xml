@@ -44,6 +44,10 @@
             android:exported="false"
             android:parentActivityName=".ui.home.HomeActivity" />
         <activity
+            android:name=".ui.batch.BatchScanActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.home.HomeActivity" />
+        <activity
             android:name=".ui.home.HomeActivity"
             android:exported="true">
             <intent-filter>
