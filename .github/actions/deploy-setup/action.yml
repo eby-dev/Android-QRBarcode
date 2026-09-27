@@ -1,0 +1,32 @@
+name: Deploy setup
+description: Ruby, caches and the AAB produced by the build job.
+
+runs:
+  using: composite
+  steps:
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.3'
+        bundler-cache: true
+
+    - uses: actions/cache@v6
+      with:
+        path: vendor/bundle
+        key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+
+    - uses: actions/cache@v6
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+
+    - shell: bash
+      run: |
+        bundle config set path 'vendor/bundle'
+        bundle install
+
+    - uses: actions/download-artifact@v8
+      with:
+        name: release-aab
+        path: app/build/outputs/bundle/release

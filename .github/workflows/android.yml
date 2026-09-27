@@ -166,35 +166,10 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3'
-          bundler-cache: true
-
-      - uses: actions/cache@v6
-        with:
-          path: vendor/bundle
-          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
-
-      - uses: actions/cache@v6
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-
-      - run: |
-          bundle config set path 'vendor/bundle'
-          bundle install
+      - uses: ./.github/actions/deploy-setup
 
       - name: Create Google Service Account JSON
         run: echo "${{ secrets.GOOGLE_PLAY_JSON }}" | base64 -d > app/${{ env.GOOGLE_PLAY_JSON }}
-
-      - name: Download built AAB
-        uses: actions/download-artifact@v8
-        with:
-          name: release-aab
-          path: app/build/outputs/bundle/release
 
       - run: bundle exec fastlane deployRelease
 
@@ -207,32 +182,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3'
-          bundler-cache: true
-
-      - uses: actions/cache@v6
-        with:
-          path: vendor/bundle
-          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
-
-      - uses: actions/cache@v6
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-
-      - run: |
-          bundle config set path 'vendor/bundle'
-          bundle install
-
-      - name: Download built AAB
-        uses: actions/download-artifact@v8
-        with:
-          name: release-aab
-          path: app/build/outputs/bundle/release
+      - uses: ./.github/actions/deploy-setup
 
       - run: bundle exec fastlane deployBeta
 
@@ -245,32 +195,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3'
-          bundler-cache: true
-
-      - uses: actions/cache@v6
-        with:
-          path: vendor/bundle
-          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
-
-      - uses: actions/cache@v6
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-
-      - run: |
-          bundle config set path 'vendor/bundle'
-          bundle install
-
-      - name: Download built AAB
-        uses: actions/download-artifact@v8
-        with:
-          name: release-aab
-          path: app/build/outputs/bundle/release
+      - uses: ./.github/actions/deploy-setup
 
       - name: Decode Firebase service account
         run: echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" | base64 -d > ${{ env.FIREBASE_SERVICE_ACCOUNT_FILE }}
