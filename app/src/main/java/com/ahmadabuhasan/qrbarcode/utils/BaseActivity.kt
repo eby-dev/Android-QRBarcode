@@ -1,5 +1,6 @@
 package com.ahmadabuhasan.qrbarcode.utils
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -16,6 +17,7 @@ abstract class BaseActivity : AppCompatActivity() {
 
     private fun applyEdgeToEdge() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        applyStatusBarIconContrast()
 
         val content = findViewById<View>(android.R.id.content)
         ViewCompat.setOnApplyWindowInsetsListener(content) { view, insets ->
@@ -32,5 +34,18 @@ abstract class BaseActivity : AppCompatActivity() {
             insets
         }
         ViewCompat.requestApplyInsets(content)
+    }
+
+    /**
+     * Edge-to-edge leaves the status bar strip showing the window background, which
+     * is white under the light theme. The system icons default to white there too,
+     * so they disappear — ask for dark icons instead. Night mode already draws a
+     * dark background behind light icons, so it is left untouched.
+     */
+    private fun applyStatusBarIconContrast() {
+        val night = resources.configuration.uiMode and
+                Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+        WindowCompat.getInsetsController(window, window.decorView)
+            .isAppearanceLightStatusBars = !night
     }
 }

@@ -123,22 +123,23 @@ object ScanContentParser {
             val message = if (colon >= 0) body.substring(colon + 1) else ""
             if (number.isBlank()) null else ScanContent.Sms(raw, number, message)
         } else {
-            val uri = runCatching { Uri.parse(raw) }.getOrNull() ?: return null
-            val number = uri.schemeSpecificPart?.substringBefore('?')?.trim().orEmpty()
+            val afterScheme = raw.substring("sms:".length)
+            val number = Uri.decode(afterScheme.substringBefore('?')).trim()
             if (number.isBlank()) null
-            else ScanContent.Sms(raw, number, uri.getQueryParameter("body").orEmpty())
+            else ScanContent.Sms(raw, number, queryParams(afterScheme)["body"].orEmpty())
         }
     }
 
     private fun parseMailto(raw: String): ScanContent.Email? {
-        val uri = runCatching { Uri.parse(raw) }.getOrNull() ?: return null
-        val to = uri.schemeSpecificPart?.substringBefore('?').orEmpty().trim()
+        val afterScheme = raw.substring("mailto:".length)
+        val to = Uri.decode(afterScheme.substringBefore('?')).trim()
         if (to.isBlank()) return null
+        val params = queryParams(afterScheme)
         return ScanContent.Email(
             raw = raw,
             to = to,
-            subject = uri.getQueryParameter("subject").orEmpty(),
-            body = uri.getQueryParameter("body").orEmpty(),
+            subject = params["subject"].orEmpty(),
+            body = params["body"].orEmpty(),
         )
     }
 
@@ -155,16 +156,24 @@ object ScanContentParser {
         )
     }
 
-    // geo:<lat>,<lng>?q=<query>
+    // geo:<lat>,<lng>[,<alt>]?q=<query>
     private fun parseGeo(raw: String): ScanContent.Geo? {
         val afterScheme = raw.substring("geo:".length)
         val coords = afterScheme.substringBefore('?')
-        val parts = coords.split(',', limit = 2)
+        val parts = coords.split(',')
         if (parts.size < 2) return null
-        val query = if ('?' in afterScheme) {
-            runCatching { Uri.parse(raw).getQueryParameter("q") }.getOrNull()
-        } else null
-        return ScanContent.Geo(raw, parts[0].trim(), parts[1].trim(), query)
+        return ScanContent.Geo(raw, parts[0].trim(), parts[1].trim(), queryParams(afterScheme)["q"])
+    }
+
+    // sms:, mailto: and geo: are opaque URIs, where Uri.getQueryParameter throws,
+    // so the query string is split by hand.
+    private fun queryParams(afterScheme: String): Map<String, String> {
+        if ('?' !in afterScheme) return emptyMap()
+        return afterScheme.substringAfter('?').split('&')
+            .filter { it.isNotEmpty() }
+            .associate { pair ->
+                Uri.decode(pair.substringBefore('=')).lowercase() to Uri.decode(pair.substringAfter('=', ""))
+            }
     }
 
     private fun parseCalendarEvent(raw: String): ScanContent.CalendarEvent {
@@ -194,9 +203,17 @@ object ScanContentParser {
                 else null
             }
         }
+        // FN is the display name. N is "Family;Given;Middle;Prefix;Suffix" and usually
+        // comes first in vCard 3.0, so it is only a fallback.
+        val structuredName = find(listOf("N:", "N;"))?.split(';')?.let { parts ->
+            listOfNotNull(parts.getOrNull(1), parts.getOrNull(0))
+                .filter { it.isNotBlank() }
+                .joinToString(" ")
+                .takeIf { it.isNotBlank() }
+        }
         return ScanContent.VCard(
             raw = raw,
-            name = find(listOf("FN:", "N:")),
+            name = find(listOf("FN:", "FN;")) ?: structuredName,
             phone = find(listOf("TEL:", "TEL;")),
             email = find(listOf("EMAIL:", "EMAIL;")),
         )

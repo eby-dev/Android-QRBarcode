@@ -12,10 +12,11 @@ import androidx.core.content.FileProvider
 import com.ahmadabuhasan.qrbarcode.R
 import com.ahmadabuhasan.qrbarcode.databinding.ActivityQrGeneratorBinding
 import com.ahmadabuhasan.qrbarcode.utils.BaseActivity
-// import com.ahmadabuhasan.qrbarcode.utils.AppConfig
-// import com.google.android.gms.ads.AdRequest
-// import com.google.android.gms.ads.AdSize
-// import com.google.android.gms.ads.AdView
+import com.ahmadabuhasan.qrbarcode.utils.AppConfig
+import com.ahmadabuhasan.qrbarcode.utils.ConsentManager
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
 import java.io.File
 import java.io.FileOutputStream
 
@@ -35,14 +36,9 @@ class QrGeneratorActivity : BaseActivity() {
             setTitle(R.string.qr_generator)
         }
 
-        // Banner disabled while AdMob publisher pub-8638037215789792 is suspended.
-        binding.adViewQrGeneratorContainer.visibility = View.GONE
-        // val adView = AdView(this).apply {
-        //     adUnitId = AppConfig.bannerAdId()
-        //     setAdSize(AdSize.BANNER)
-        // }
-        // binding.adViewQrGeneratorContainer.addView(adView)
-        // adView.loadAd(AdRequest.Builder().build())
+        // Consent normally resolved on MainActivity already; this is a no-op
+        // refresh in that case and just builds the banner.
+        ConsentManager.gatherConsent(this) { showBanner() }
 
         binding.btnGenerate.setOnClickListener {
             viewModel.generate(binding.editContent.text?.toString() ?: "")
@@ -54,6 +50,17 @@ class QrGeneratorActivity : BaseActivity() {
         }
 
         observeViewModel()
+    }
+
+    private fun showBanner() {
+        val container = binding.adViewQrGeneratorContainer
+        if (container.childCount > 0) return
+        val adView = AdView(this).apply {
+            adUnitId = AppConfig.bannerAdId()
+            setAdSize(AdSize.BANNER)
+        }
+        container.addView(adView)
+        adView.loadAd(AdRequest.Builder().build())
     }
 
     private fun observeViewModel() {

@@ -16,9 +16,9 @@ env:
   KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
   FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
   FIREBASE_SERVICE_ACCOUNT_FILE: firebase-sa.json
-  ADMOB_APPLICATION_ID: ${{ secrets.ADMOB_APPLICATION_ID }}
-  BANNER_AD_ID: ${{ secrets.BANNER_AD_ID }}
-  INTERSTITIAL_AD_ID: ${{ secrets.INTERSTITIAL_AD_ID }}
+  ADMOB_APP_ID: ${{ secrets.ADMOB_APP_ID }}
+  ADMOB_BANNER_ID: ${{ secrets.ADMOB_BANNER_ID }}
+  ADMOB_INTERSTITIAL_ID: ${{ secrets.ADMOB_INTERSTITIAL_ID }}
 
 jobs:
   setup:
@@ -117,9 +117,9 @@ jobs:
           echo "KEYSTORE_PASSWORD=${{ env.KEYSTORE_PASSWORD }}" >> local.properties
           echo "KEY_ALIAS=${{ env.KEY_ALIAS }}" >> local.properties
           echo "KEY_PASSWORD=${{ env.KEY_PASSWORD }}" >> local.properties
-          echo "admob_application_id=${{ env.ADMOB_APPLICATION_ID }}" >> local.properties
-          echo "banner_ad_id=${{ env.BANNER_AD_ID }}" >> local.properties
-          echo "interstitial_ad_id=${{ env.INTERSTITIAL_AD_ID }}" >> local.properties
+          echo "admob_app_id=${{ env.ADMOB_APP_ID }}" >> local.properties
+          echo "admob_banner_id=${{ env.ADMOB_BANNER_ID }}" >> local.properties
+          echo "admob_interstitial_id=${{ env.ADMOB_INTERSTITIAL_ID }}" >> local.properties
 
       - name: Grant gradlew permission
         run: chmod +x ./gradlew
