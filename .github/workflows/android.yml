@@ -161,7 +161,7 @@ jobs:
     name: Deploy to Play Store (Production)
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
-    needs: build
+    needs: [build, unit-test, code-analysis]
 
     steps:
       - uses: actions/checkout@v5
@@ -202,7 +202,7 @@ jobs:
     name: Deploy to Play Store (Beta)
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/development'
-    needs: build
+    needs: [build, unit-test, code-analysis]
 
     steps:
       - uses: actions/checkout@v5
@@ -240,7 +240,7 @@ jobs:
     name: Distribute via Firebase (Internal)
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/heads/internal-testing/')
-    needs: build
+    needs: [build, unit-test, code-analysis]
 
     steps:
       - uses: actions/checkout@v5
