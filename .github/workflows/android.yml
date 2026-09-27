@@ -187,6 +187,9 @@ jobs:
 
       - uses: ./.github/actions/deploy-setup
 
+      - name: Create Google Service Account JSON
+        run: echo "${{ secrets.GOOGLE_PLAY_JSON }}" | base64 -d > app/${{ env.GOOGLE_PLAY_JSON }}
+
       - run: bundle exec fastlane deployBeta
 
   deploy-firebase-internal:
