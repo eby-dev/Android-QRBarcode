@@ -41,6 +41,10 @@
             android:theme="@style/Theme.QRBarcode.WaDirect" />
         <activity
             android:name=".ui.main.MainActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.home.HomeActivity" />
+        <activity
+            android:name=".ui.home.HomeActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

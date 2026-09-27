@@ -2,7 +2,6 @@ package com.ahmadabuhasan.qrbarcode.ui.main
 
 import android.Manifest
 import android.content.Intent
-import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
@@ -10,7 +9,6 @@ import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -21,35 +19,24 @@ import androidx.camera.view.LifecycleCameraController
 import androidx.core.content.ContextCompat
 import com.ahmadabuhasan.qrbarcode.R
 import com.ahmadabuhasan.qrbarcode.databinding.ActivityMainBinding
-import com.ahmadabuhasan.qrbarcode.ui.about.AboutActivity
-import com.ahmadabuhasan.qrbarcode.ui.history.HistoryActivity
-import com.ahmadabuhasan.qrbarcode.ui.qrgenerator.QrGeneratorActivity
-import com.ahmadabuhasan.qrbarcode.ui.wadirect.WaDirectActivity
-import com.ahmadabuhasan.qrbarcode.utils.BaseActivity
 import com.ahmadabuhasan.qrbarcode.utils.AppConfig
+import com.ahmadabuhasan.qrbarcode.utils.BaseActivity
 import com.ahmadabuhasan.qrbarcode.utils.ConsentManager
 import com.ahmadabuhasan.qrbarcode.utils.Haptics
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.play.core.appupdate.AppUpdateInfo
-import com.google.android.play.core.appupdate.AppUpdateManager
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory
-import com.google.android.play.core.install.InstallStateUpdatedListener
-import com.google.android.play.core.install.model.AppUpdateType
-import com.google.android.play.core.install.model.InstallStatus
-import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 
+// The scanner. Opened from the dashboard (HomeActivity), or straight from launch
+// when "Open camera on launch" is on; Back returns to the dashboard.
 class MainActivity : BaseActivity(), ScanResultBottomSheet.Listener {
 
     companion object {
         private const val PERMISSION_CODE = 100
-        private const val FLEXIBLE_APP_UPDATE_REQ_CODE = 123
-        private var pressedTime: Long = 0
     }
 
     // ViewModel — semua state & logic bisnis ada di sini
@@ -57,8 +44,6 @@ class MainActivity : BaseActivity(), ScanResultBottomSheet.Listener {
 
     private lateinit var cameraController: LifecycleCameraController
     private var barcodeScanner: BarcodeScanner? = null
-    private lateinit var appUpdateManager: AppUpdateManager
-    private lateinit var installStateUpdatedListener: InstallStateUpdatedListener
 
     private lateinit var binding: ActivityMainBinding
 
@@ -73,6 +58,11 @@ class MainActivity : BaseActivity(), ScanResultBottomSheet.Listener {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            setTitle(R.string.scan)
+        }
+
         // The controller enables photo capture by default; the scanner only needs
         // preview + analysis, so drop ImageCapture to save camera resources.
         cameraController = LifecycleCameraController(this).apply {
@@ -83,19 +73,6 @@ class MainActivity : BaseActivity(), ScanResultBottomSheet.Listener {
         } else {
             requestPermissions(arrayOf(Manifest.permission.CAMERA), PERMISSION_CODE)
         }
-
-        appUpdateManager = AppUpdateManagerFactory.create(this)
-        checkUpdate()
-        installStateUpdatedListener = InstallStateUpdatedListener { state ->
-            when (state.installStatus()) {
-                InstallStatus.DOWNLOADED -> popupSnackBarForCompleteUpdate()
-                InstallStatus.INSTALLED -> removeInstallStateUpdateListener()
-                else -> Unit
-            }
-        }
-        // Without registering, the "update downloaded → RESTART" snackbar only
-        // appeared on the next launch.
-        appUpdateManager.registerListener(installStateUpdatedListener)
 
         // GDPR: the banner is only built once consent has been resolved.
         ConsentManager.gatherConsent(this) { showBanner() }
@@ -161,32 +138,9 @@ class MainActivity : BaseActivity(), ScanResultBottomSheet.Listener {
             binding.flashOff?.visibility = if (enabled) View.VISIBLE else View.GONE
         }
 
-        viewModel.scanResult.observe(this) { result ->
-            result ?: return@observe  // null = sudah dikonsumsi
-            // A dismissed sheet stays in the FragmentManager until its removal
-            // commit runs, and ML Kit can deliver a new result in that gap. Flush
-            // pending transactions so the check sees only a sheet that's really open.
-            supportFragmentManager.executePendingTransactions()
-            if (supportFragmentManager.findFragmentByTag(ScanResultBottomSheet.TAG) == null) {
-                ScanResultBottomSheet.new(result.text, result.format)
-                    .show(supportFragmentManager, ScanResultBottomSheet.TAG)
-            } else {
-                // No new sheet means no dismiss callback either; don't leave the
-                // scanner paused with nothing on screen to resume it.
-                viewModel.resumeScanning()
-            }
-            viewModel.onScanResultConsumed()
-        }
-
-        viewModel.galleryDecodeError.observe(this) { error ->
-            error ?: return@observe
-            val msgRes = when (error) {
-                MainViewModel.GalleryDecodeError.NoResult -> R.string.scan_from_gallery_no_result
-                MainViewModel.GalleryDecodeError.ReadFailed -> R.string.scan_from_gallery_read_failed
-            }
-            Toast.makeText(this, msgRes, Toast.LENGTH_LONG).show()
-            viewModel.onGalleryDecodeErrorConsumed()
-        }
+        // No new sheet means no dismiss callback either; don't leave the scanner
+        // paused with nothing on screen to resume it.
+        observeScanResults(viewModel, onSheetSkipped = viewModel::resumeScanning)
     }
 
     // Activity hanya tahu "user tap flash" → delegasi ke ViewModel
@@ -206,7 +160,6 @@ class MainActivity : BaseActivity(), ScanResultBottomSheet.Listener {
     override fun onDestroy() {
         super.onDestroy()
         barcodeScanner?.close()
-        removeInstallStateUpdateListener()
     }
 
     // Bottom sheet ditutup → lanjut scan supaya bisa scan berikutnya
@@ -239,89 +192,21 @@ class MainActivity : BaseActivity(), ScanResultBottomSheet.Listener {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.optionmenu, menu)
+        menuInflater.inflate(R.menu.menu_scanner, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.scan_from_gallery -> pickImageLauncher.launch(
-                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-            )
-            R.id.history -> startActivity(Intent(this, HistoryActivity::class.java))
-            R.id.qr_generator -> startActivity(Intent(this, QrGeneratorActivity::class.java))
-            R.id.wa_direct -> startActivity(Intent(this, WaDirectActivity::class.java))
-            R.id.about -> startActivity(Intent(this, AboutActivity::class.java))
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        @Suppress("DEPRECATION")
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == FLEXIBLE_APP_UPDATE_REQ_CODE) {
-            when (resultCode) {
-                RESULT_CANCELED -> Toast.makeText(applicationContext, "Update canceled by user! ", Toast.LENGTH_LONG).show()
-                RESULT_OK -> Toast.makeText(applicationContext, "Update success! ", Toast.LENGTH_LONG).show()
-                else -> {
-                    Toast.makeText(applicationContext, "Update failed! ", Toast.LENGTH_LONG).show()
-                    checkUpdate()
-                }
+        return when (item.itemId) {
+            android.R.id.home -> {
+                finish()
+                true
             }
-        }
-    }
-
-    private fun checkUpdate() {
-        appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
-            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
-                appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)
-            ) {
-                startUpdateFlow(appUpdateInfo)
-            } else if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
-                popupSnackBarForCompleteUpdate()
+            R.id.scan_from_gallery -> {
+                pickImageLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                true
             }
+            else -> super.onOptionsItemSelected(item)
         }
-    }
-
-    @Suppress("DEPRECATION")
-    private fun startUpdateFlow(appUpdateInfo: AppUpdateInfo) {
-        try {
-            appUpdateManager.startUpdateFlowForResult(
-                appUpdateInfo,
-                AppUpdateType.FLEXIBLE,
-                this,
-                FLEXIBLE_APP_UPDATE_REQ_CODE
-            )
-        } catch (e: IntentSender.SendIntentException) {
-            e.printStackTrace()
-        }
-    }
-
-    private fun popupSnackBarForCompleteUpdate() {
-        Snackbar.make(
-            findViewById(R.id.layout_activity_main),
-            "An update has just been downloaded.",
-            Snackbar.LENGTH_INDEFINITE
-        ).apply {
-            setAction("RESTART") { appUpdateManager.completeUpdate() }
-            setActionTextColor(ContextCompat.getColor(this@MainActivity, R.color.red))
-            show()
-        }
-    }
-
-    private fun removeInstallStateUpdateListener() {
-        appUpdateManager.unregisterListener(installStateUpdatedListener)
-    }
-
-    @Deprecated("Deprecated in Java")
-    @Suppress("MissingSuperCall")
-    override fun onBackPressed() {
-        if (pressedTime + 2000 > System.currentTimeMillis()) {
-            finishAndRemoveTask()
-        } else {
-            Toast.makeText(this, "Press once again to exit", Toast.LENGTH_SHORT).show()
-        }
-        pressedTime = System.currentTimeMillis()
     }
 }

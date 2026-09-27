@@ -12,6 +12,9 @@ interface ScanHistoryDao {
     @Query("SELECT * FROM scan_history ORDER BY scannedAt DESC")
     fun observeAll(): LiveData<List<ScanHistoryEntity>>
 
+    @Query("SELECT * FROM scan_history ORDER BY scannedAt DESC LIMIT :limit")
+    fun observeRecent(limit: Int): LiveData<List<ScanHistoryEntity>>
+
     @Insert
     suspend fun insert(entity: ScanHistoryEntity): Long
 
