@@ -26,7 +26,7 @@ object BatchCsv {
     fun build(items: List<BatchItem>, timeZone: TimeZone = TimeZone.getDefault()): String {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).apply { this.timeZone = timeZone }
         return buildString {
-            append('﻿').append(HEADER).append("\r\n")
+            append('\uFEFF').append(HEADER).append("\r\n")
             items.forEach { item ->
                 append(cell(item.content)).append(',')
                 append(cell(item.format)).append(',')
