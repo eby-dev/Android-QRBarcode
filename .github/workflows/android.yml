@@ -5,7 +5,8 @@ on:
     branches:
       - development
       - master
-      - internal-testing/**
+  # internal-testing/** is manual only: Actions → Android CI → Run workflow,
+  # pick the branch. The Firebase job still keys off the branch name.
   workflow_dispatch:
 
 env:

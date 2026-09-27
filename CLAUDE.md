@@ -104,4 +104,4 @@ Ad unit IDs (banner, interstitial) are compiled into `libnative-lib.so` as prepr
 
 ## CI/CD
 
-GitHub Actions ([.github/workflows/android.yml](.github/workflows/android.yml)) runs on pushes to `master`, `development`, and `internal-testing/*` branches. Pipeline: setup → build → unit-test → code-analysis → deploy. Fastlane handles the actual build/deploy steps. The "Build AAB" job writes signing + AdMob secrets into `local.properties` before invoking Gradle.
+GitHub Actions ([.github/workflows/android.yml](.github/workflows/android.yml)) runs on pushes to `master` and `development`. `internal-testing/*` branches are **manual only** (Actions → Android CI → Run workflow → pick the branch), which then distributes via Firebase. Any push or manual run on `master` deploys to Play Store production, so `versionCode` must be bumped first. Pipeline: setup → build → unit-test → code-analysis → deploy. Fastlane handles the actual build/deploy steps. The "Build AAB" job writes signing + AdMob secrets into `local.properties` before invoking Gradle.
