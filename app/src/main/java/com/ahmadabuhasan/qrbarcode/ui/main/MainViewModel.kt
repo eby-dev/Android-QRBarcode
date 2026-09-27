@@ -28,9 +28,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     var isScanningPaused = false
         private set
 
+    // ML Kit reads a code within a frame or two, so "Scan again" while still
+    // pointing at the same code would reopen the sheet instantly. Ignore that
+    // same code for a short grace period after resuming.
+    private var lastScannedText: String? = null
+    private var resumedAt = 0L
+
     fun resumeScanning() {
         isScanningPaused = false
+        resumedAt = System.currentTimeMillis()
     }
+
+    fun shouldIgnoreLiveScan(text: String): Boolean =
+        isScanningPaused ||
+            (text == lastScannedText && System.currentTimeMillis() - resumedAt < RESCAN_GRACE_MS)
 
     // --- Flash state ---
     private val _flashEnabled = MutableLiveData(false)
@@ -52,6 +63,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun handleScanResult(text: String, format: String) {
         isScanningPaused = true
+        lastScannedText = text
         val isUrl = ScanContentParser.parse(text) is ScanContent.Url
 
         viewModelScope.launch {
@@ -99,5 +111,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     override fun onCleared() {
         galleryScanner.close()
+    }
+
+    private companion object {
+        const val RESCAN_GRACE_MS = 2000L
     }
 }
