@@ -9,6 +9,7 @@ import android.text.format.DateUtils
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -55,11 +56,11 @@ class HomeActivity : BaseActivity() {
 
     companion object {
         private const val FLEXIBLE_APP_UPDATE_REQ_CODE = 123
-        private var pressedTime: Long = 0
     }
 
     private val viewModel: HomeViewModel by viewModels()
     private lateinit var binding: ActivityHomeBinding
+    private var backPressedTime: Long = 0
 
     private lateinit var appUpdateManager: AppUpdateManager
     private lateinit var installStateUpdatedListener: InstallStateUpdatedListener
@@ -80,6 +81,17 @@ class HomeActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (backPressedTime + 2000 > System.currentTimeMillis()) {
+                    finishAndRemoveTask()
+                } else {
+                    Toast.makeText(this@HomeActivity, "Press once again to exit", Toast.LENGTH_SHORT).show()
+                }
+                backPressedTime = System.currentTimeMillis()
+            }
+        })
 
         val sharedImageUri = if (savedInstanceState == null) extractSharedImageUri(intent) else null
         if (sharedImageUri == null && savedInstanceState == null && AppPrefs.openCameraOnLaunch(this)) {
@@ -308,14 +320,4 @@ class HomeActivity : BaseActivity() {
         appUpdateManager.unregisterListener(installStateUpdatedListener)
     }
 
-    @Deprecated("Deprecated in Java")
-    @Suppress("MissingSuperCall")
-    override fun onBackPressed() {
-        if (pressedTime + 2000 > System.currentTimeMillis()) {
-            finishAndRemoveTask()
-        } else {
-            Toast.makeText(this, "Press once again to exit", Toast.LENGTH_SHORT).show()
-        }
-        pressedTime = System.currentTimeMillis()
-    }
 }
