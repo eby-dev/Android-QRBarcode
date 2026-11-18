@@ -14,6 +14,24 @@
     <string name="qr_generator_generate">Generate</string>
     <string name="qr_generator_share">Share QR</string>
     <string name="qr_generator_empty">Please enter text or URL</string>
+    <string name="qr_generator_type_text">Text</string>
+    <string name="qr_generator_type_wifi">Wi-Fi</string>
+    <string name="qr_generator_type_whatsapp">WhatsApp</string>
+    <string name="qr_generator_wifi_ssid">Network name (SSID)</string>
+    <string name="qr_generator_wifi_password">Password</string>
+    <string name="qr_generator_wifi_wpa">WPA/WPA2</string>
+    <string name="qr_generator_wifi_wep">WEP</string>
+    <string name="qr_generator_wifi_none">Open</string>
+    <string name="qr_generator_wifi_ssid_required">Enter a Wi-Fi network name</string>
+    <string name="qr_generator_wifi_password_required">Enter the Wi-Fi password</string>
+    <string name="qr_generator_whatsapp_phone">Phone with country code (e.g. 628123456789)</string>
+    <string name="qr_generator_whatsapp_message">Prefilled message (optional)</string>
+    <string name="qr_generator_whatsapp_phone_invalid">Enter a phone number with country code</string>
+    <string name="qr_generator_save">Save to Gallery</string>
+    <string name="qr_generator_saved">QR saved to Pictures/QRBarcode</string>
+    <string name="qr_generator_save_failed">Could not save QR image</string>
+    <string name="qr_generator_permission_denied">Storage permission is needed to save the QR image</string>
+    <string name="qr_generator_error">Could not generate this QR code</string>
     <string name="scan">Scan</string>
     <string name="home_scan_title">Scan QR / Barcode</string>
     <string name="home_scan_subtitle">Point your camera at a code</string>
@@ -51,6 +69,19 @@
     <string name="scan_result_copied">Copied to clipboard</string>
     <string name="scan_result_password_copied">Password copied to clipboard</string>
     <string name="scan_result_no_app">No app can handle this</string>
+    <string name="product_lookup_action">Look up food product</string>
+    <string name="product_lookup_loading">Looking up barcode…</string>
+    <string name="product_lookup_found">Product information</string>
+    <string name="product_lookup_no_details">Product found, but no details are available.</string>
+    <string name="product_lookup_not_found">No product was found for this barcode.</string>
+    <string name="product_lookup_failed">Could not look up the product. Check your connection and try again.</string>
+    <string name="product_lookup_attribution">Data from Open Food Facts. Product information is community-maintained and may be incomplete.</string>
+    <string name="product_detail_name">Name: %1$s</string>
+    <string name="product_detail_brand">Brand: %1$s</string>
+    <string name="product_detail_quantity">Quantity: %1$s</string>
+    <string name="product_detail_ingredients">Ingredients: %1$s</string>
+    <string name="product_detail_allergens">Allergens: %1$s</string>
+    <string name="product_detail_nutrition">Nutrition per 100 g: %1$s</string>
 
     <!-- Type labels shown above the content preview -->
     <string name="scan_type_url">URL</string>

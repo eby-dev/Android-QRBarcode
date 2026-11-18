@@ -21,7 +21,12 @@ class QrGeneratorViewModel : ViewModel() {
             _error.value = "empty"
             return
         }
-        _qrBitmap.value = createQrBitmap(content)
+        try {
+            _qrBitmap.value = createQrBitmap(content)
+            _error.value = null
+        } catch (_: Exception) {
+            _error.value = "generate"
+        }
     }
 
     fun onErrorShown() {

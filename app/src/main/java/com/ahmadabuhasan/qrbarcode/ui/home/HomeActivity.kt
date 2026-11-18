@@ -9,6 +9,7 @@ import android.text.format.DateUtils
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -55,11 +56,11 @@ class HomeActivity : BaseActivity() {
 
     companion object {
         private const val FLEXIBLE_APP_UPDATE_REQ_CODE = 123
-        private var pressedTime: Long = 0
     }
 
     private val viewModel: HomeViewModel by viewModels()
     private lateinit var binding: ActivityHomeBinding
+    private var backPressedTime: Long = 0
 
     private lateinit var appUpdateManager: AppUpdateManager
     private lateinit var installStateUpdatedListener: InstallStateUpdatedListener
@@ -81,7 +82,19 @@ class HomeActivity : BaseActivity() {
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        if (savedInstanceState == null && AppPrefs.openCameraOnLaunch(this)) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (backPressedTime + 2000 > System.currentTimeMillis()) {
+                    finishAndRemoveTask()
+                } else {
+                    Toast.makeText(this@HomeActivity, "Press once again to exit", Toast.LENGTH_SHORT).show()
+                }
+                backPressedTime = System.currentTimeMillis()
+            }
+        })
+
+        val sharedImageUri = if (savedInstanceState == null) extractSharedImageUri(intent) else null
+        if (sharedImageUri == null && savedInstanceState == null && AppPrefs.openCameraOnLaunch(this)) {
             openedCameraOnLaunch = true
             openScanner(animate = false)
         }
@@ -101,6 +114,24 @@ class HomeActivity : BaseActivity() {
         setupActions()
         observeRecentScans()
         observeScanResults(viewModel)
+        sharedImageUri?.let(viewModel::decodeImageFromUri)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        extractSharedImageUri(intent)?.let(viewModel::decodeImageFromUri)
+    }
+
+    @Suppress("DEPRECATION")
+    private fun extractSharedImageUri(source: Intent?): Uri? {
+        if (source?.action != Intent.ACTION_SEND || source.type?.startsWith("image/") != true) return null
+        val streamUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            source.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+        } else {
+            source.getParcelableExtra(Intent.EXTRA_STREAM) as? Uri
+        }
+        return streamUri ?: source.clipData?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.uri
     }
 
     override fun onRestart() {
@@ -289,14 +320,4 @@ class HomeActivity : BaseActivity() {
         appUpdateManager.unregisterListener(installStateUpdatedListener)
     }
 
-    @Deprecated("Deprecated in Java")
-    @Suppress("MissingSuperCall")
-    override fun onBackPressed() {
-        if (pressedTime + 2000 > System.currentTimeMillis()) {
-            finishAndRemoveTask()
-        } else {
-            Toast.makeText(this, "Press once again to exit", Toast.LENGTH_SHORT).show()
-        }
-        pressedTime = System.currentTimeMillis()
-    }
 }
