@@ -16,11 +16,16 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.StringRes
+import androidx.lifecycle.lifecycleScope
 import com.ahmadabuhasan.qrbarcode.R
+import com.ahmadabuhasan.qrbarcode.data.FoodProduct
+import com.ahmadabuhasan.qrbarcode.data.OpenFoodFactsRepository
+import com.ahmadabuhasan.qrbarcode.data.ProductLookupResult
 import com.ahmadabuhasan.qrbarcode.model.ScanContent
 import com.ahmadabuhasan.qrbarcode.model.ScanContentParser
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.button.MaterialButton
+import kotlinx.coroutines.launch
 
 class ScanResultBottomSheet : BottomSheetDialogFragment() {
 
@@ -44,6 +49,48 @@ class ScanResultBottomSheet : BottomSheetDialogFragment() {
         view.findViewById<TextView>(R.id.textTypeLabel).text =
             getString(R.string.history_meta_format, getString(content.typeLabelRes()), trailing)
         view.findViewById<TextView>(R.id.textContent).text = displayTextFor(content)
+
+        val btnLookupProduct = view.findViewById<MaterialButton>(R.id.btnLookupProduct)
+        val productStatus = view.findViewById<TextView>(R.id.textProductStatus)
+        val productDetails = view.findViewById<TextView>(R.id.textProductDetails)
+        val productAttribution = view.findViewById<TextView>(R.id.textProductAttribution)
+        val canLookupProduct = format in PRODUCT_BARCODE_FORMATS && rawText.all(Char::isDigit)
+        btnLookupProduct.visibility = if (canLookupProduct) View.VISIBLE else View.GONE
+        if (canLookupProduct) {
+            btnLookupProduct.setOnClickListener {
+                btnLookupProduct.isEnabled = false
+                productStatus.visibility = View.VISIBLE
+                productStatus.setText(R.string.product_lookup_loading)
+                productDetails.visibility = View.GONE
+                productAttribution.visibility = View.GONE
+
+                viewLifecycleOwner.lifecycleScope.launch {
+                    when (val result = OpenFoodFactsRepository.findProduct(rawText)) {
+                        is ProductLookupResult.Found -> {
+                            val details = result.product.toDisplayText()
+                            productStatus.setText(
+                                if (details.isBlank()) R.string.product_lookup_no_details
+                                else R.string.product_lookup_found
+                            )
+                            if (details.isNotBlank()) {
+                                productDetails.text = details
+                                productDetails.visibility = View.VISIBLE
+                                productAttribution.visibility = View.VISIBLE
+                            }
+                            btnLookupProduct.isEnabled = true
+                        }
+                        ProductLookupResult.NotFound -> {
+                            productStatus.setText(R.string.product_lookup_not_found)
+                            btnLookupProduct.isEnabled = true
+                        }
+                        ProductLookupResult.Failed -> {
+                            productStatus.setText(R.string.product_lookup_failed)
+                            btnLookupProduct.isEnabled = true
+                        }
+                    }
+                }
+            }
+        }
 
         val btnPrimary = view.findViewById<MaterialButton>(R.id.btnPrimary)
         val primary = primaryActionFor(content)
@@ -123,6 +170,15 @@ class ScanResultBottomSheet : BottomSheetDialogFragment() {
     }
 
     private data class PrimaryAction(@StringRes val labelRes: Int, val action: () -> Unit)
+
+    private fun FoodProduct.toDisplayText(): String = buildList {
+        name?.let { add(getString(R.string.product_detail_name, it)) }
+        brands?.let { add(getString(R.string.product_detail_brand, it)) }
+        quantity?.let { add(getString(R.string.product_detail_quantity, it)) }
+        ingredients?.let { add(getString(R.string.product_detail_ingredients, it)) }
+        allergens?.let { add(getString(R.string.product_detail_allergens, it)) }
+        nutritionSummary?.let { add(getString(R.string.product_detail_nutrition, it)) }
+    }.joinToString("\n\n")
 
     private fun primaryActionFor(content: ScanContent): PrimaryAction? = when (content) {
         is ScanContent.Url -> PrimaryAction(R.string.scan_action_open) {
@@ -225,6 +281,7 @@ class ScanResultBottomSheet : BottomSheetDialogFragment() {
 
     companion object {
         const val TAG = "ScanResultBottomSheet"
+        private val PRODUCT_BARCODE_FORMATS = setOf("EAN_8", "EAN_13", "UPC_A", "UPC_E")
         private const val ARG_TEXT = "text"
         private const val ARG_FORMAT = "format"
 

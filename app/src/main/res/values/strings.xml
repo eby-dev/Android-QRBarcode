@@ -69,6 +69,19 @@
     <string name="scan_result_copied">Copied to clipboard</string>
     <string name="scan_result_password_copied">Password copied to clipboard</string>
     <string name="scan_result_no_app">No app can handle this</string>
+    <string name="product_lookup_action">Look up food product</string>
+    <string name="product_lookup_loading">Looking up barcode…</string>
+    <string name="product_lookup_found">Product information</string>
+    <string name="product_lookup_no_details">Product found, but no details are available.</string>
+    <string name="product_lookup_not_found">No product was found for this barcode.</string>
+    <string name="product_lookup_failed">Could not look up the product. Check your connection and try again.</string>
+    <string name="product_lookup_attribution">Data from Open Food Facts. Product information is community-maintained and may be incomplete.</string>
+    <string name="product_detail_name">Name: %1$s</string>
+    <string name="product_detail_brand">Brand: %1$s</string>
+    <string name="product_detail_quantity">Quantity: %1$s</string>
+    <string name="product_detail_ingredients">Ingredients: %1$s</string>
+    <string name="product_detail_allergens">Allergens: %1$s</string>
+    <string name="product_detail_nutrition">Nutrition per 100 g: %1$s</string>
 
     <!-- Type labels shown above the content preview -->
     <string name="scan_type_url">URL</string>

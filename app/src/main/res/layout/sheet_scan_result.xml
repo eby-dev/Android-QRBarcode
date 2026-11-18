@@ -31,6 +31,45 @@
         tools:text="https://example.com/scanned" />
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnLookupProduct"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="@string/product_lookup_action"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <TextView
+        android:id="@+id/textProductStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textColor="?android:attr/textColorSecondary"
+        android:visibility="gone"
+        tools:text="Product information" />
+
+    <TextView
+        android:id="@+id/textProductDetails"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textIsSelectable="true"
+        android:visibility="gone"
+        tools:text="Product details" />
+
+    <TextView
+        android:id="@+id/textProductAttribution"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/product_lookup_attribution"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="12sp"
+        android:visibility="gone" />
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnPrimary"
         style="@style/Widget.MaterialComponents.Button"
         android:layout_width="match_parent"
